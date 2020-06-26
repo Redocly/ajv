@@ -1,5 +1,5 @@
 {
-  "name": "ajv",
+  "name": "@redocly/ajv",
   "version": "6.12.2",
   "description": "Another JSON Schema Validator",
   "main": "lib/ajv.js",
