@@ -180,6 +180,7 @@ declare namespace ajv {
     loadSchema?: (uri: string, cb?: (err: Error, schema: object) => void) => PromiseLike<object | boolean>;
     loadSchemaSync?: (base: string, $ref: string, id: string) => object | boolean;
     removeAdditional?: boolean | 'all' | 'failing';
+    defaultAdditionalProperties?: boolean;
     useDefaults?: boolean | 'empty' | 'shared';
     coerceTypes?: boolean | 'array';
     strictDefaults?: boolean | 'log';

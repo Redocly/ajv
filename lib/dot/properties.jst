@@ -31,7 +31,7 @@
   var $schemaKeys = Object.keys($schema || {})
     , $pProperties = it.schema.patternProperties || {}
     , $pPropertyKeys = Object.keys($pProperties)
-    , $aProperties = it.schema.additionalProperties
+    , $aProperties = it.schema.additionalProperties !== undefined ? it.schema.additionalProperties : it.opts.defaultAdditionalProperties
     , $someProperties = $schemaKeys.length || $pPropertyKeys.length
     , $noAdditional = $aProperties === false
     , $additionalIsSchema = typeof $aProperties == 'object'
