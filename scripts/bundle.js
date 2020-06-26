@@ -20,6 +20,8 @@ if (!fs.existsSync(distDir)) fs.mkdirSync(distDir);
 var bOpts = {};
 if (standalone) bOpts.standalone = standalone;
 
+json.name = 'ajv';
+
 browserify(bOpts)
 .require(path.join(packageDir, json.main), {expose: json.name})
 .bundle(function (err, buf) {
