@@ -28,10 +28,15 @@
     , $nextData = 'data' + $dataNxt
     , $dataProperties = 'dataProperties' + $lvl;
 
-  var $schemaKeys = Object.keys($schema || {})
+  var $schemaKeys = Object.keys($schema || {}).filter(notProto)
     , $pProperties = it.schema.patternProperties || {}
+<<<<<<< HEAD
     , $pPropertyKeys = Object.keys($pProperties)
     , $aProperties = it.schema.additionalProperties !== undefined ? it.schema.additionalProperties : it.opts.defaultAdditionalProperties
+=======
+    , $pPropertyKeys = Object.keys($pProperties).filter(notProto)
+    , $aProperties = it.schema.additionalProperties
+>>>>>>> ignore proto properties
     , $someProperties = $schemaKeys.length || $pPropertyKeys.length
     , $noAdditional = $aProperties === false
     , $additionalIsSchema = typeof $aProperties == 'object'
@@ -42,8 +47,11 @@
     , $currentBaseId = it.baseId;
 
   var $required = it.schema.required;
-  if ($required && !(it.opts.$data && $required.$data) && $required.length < it.opts.loopRequired)
+  if ($required && !(it.opts.$data && $required.$data) && $required.length < it.opts.loopRequired) {
     var $requiredHash = it.util.toHash($required);
+  }
+
+  function notProto(p) { return p !== '__proto__'; }
 }}
 
 
