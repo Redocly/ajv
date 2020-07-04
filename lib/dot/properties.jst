@@ -30,13 +30,8 @@
 
   var $schemaKeys = Object.keys($schema || {}).filter(notProto)
     , $pProperties = it.schema.patternProperties || {}
-<<<<<<< HEAD
-    , $pPropertyKeys = Object.keys($pProperties)
-    , $aProperties = it.schema.additionalProperties !== undefined ? it.schema.additionalProperties : it.opts.defaultAdditionalProperties
-=======
     , $pPropertyKeys = Object.keys($pProperties).filter(notProto)
     , $aProperties = it.schema.additionalProperties
->>>>>>> ignore proto properties
     , $someProperties = $schemaKeys.length || $pPropertyKeys.length
     , $noAdditional = $aProperties === false
     , $additionalIsSchema = typeof $aProperties == 'object'
