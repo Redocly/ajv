@@ -15,9 +15,16 @@ describe("boolean schemas", () => {
       new Ajv,
       new Ajv({allErrors: true}),
       new Ajv({inlineRefs: false}),
-      new Ajv({strictKeywords: true}),
-    ];
-  });
+      new Ajv({strict: false}),
+    ]
+  })
+
+  describe("top level schema", () => {
+    describe("schema = true", () => {
+      it("should validate any data as valid", () => {
+        ajvs.forEach(test(true, true))
+      })
+    })
 
     describe("schema = false", () => {
       it("should validate any data as invalid", () => {
