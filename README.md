@@ -1104,7 +1104,6 @@ Defaults:
   allErrors:        false,
   verbose:          false,
   $comment:         false, // NEW in Ajv version 6.0
-  jsonPointers:     false,
   nullable:         false,
   format:           true,
   formats:          {},
@@ -1152,7 +1151,6 @@ Defaults:
   - `false` (default): ignore \$comment keyword.
   - `true`: log the keyword value to console.
   - function: pass the keyword value, its schema path and root schema to the specified function
-- _jsonPointers_: set `dataPath` property of errors using [JSON Pointers](https://tools.ietf.org/html/rfc6901) instead of JavaScript property access notation.
 - _nullable_: support keyword "nullable" from [Open API 3 specification](https://swagger.io/docs/specification/data-models/data-types/).
 - _format_: formats validation mode. Option values:
   - `true` (default) - validate added formats (see [Formats](#formats)).
@@ -1251,7 +1249,7 @@ In case of validation failure, Ajv assigns the array of errors to `errors` prope
 Each error is an object with the following properties:
 
 - _keyword_: validation keyword.
-- _dataPath_: the path to the part of the data that was validated. By default `dataPath` uses JavaScript property access notation (e.g., `".prop[1].subProp"`). When the option `jsonPointers` is true (see [Options](#options)) `dataPath` will be set using JSON pointer standard (e.g., `"/prop/1/subProp"`).
+- _dataPath_: JSON pointer to the part of the data that was validated (e.g., `"/prop/1/subProp"`).
 - _schemaPath_: the path (JSON-pointer as a URI fragment) to the schema of the keyword that failed validation.
 - _params_: the object with the additional information about error that can be used to generate error messages (e.g., using [ajv-i18n](https://github.com/ajv-validator/ajv-i18n) package). See below for parameters set by all keywords.
 - _message_: the standard error message (can be excluded with option `messages` set to false).
