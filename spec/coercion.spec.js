@@ -1,9 +1,9 @@
 "use strict"
 
-var Ajv = require("./ajv")
+const Ajv = require("./ajv")
 require("./chai").should()
 
-var coercionRules = {
+const coercionRules = {
   string: {
     number: [
       {from: 1, to: "1"},
@@ -121,7 +121,7 @@ var coercionRules = {
   },
 }
 
-var coercionArrayRules = JSON.parse(JSON.stringify(coercionRules))
+const coercionArrayRules = JSON.parse(JSON.stringify(coercionRules))
 coercionArrayRules.string.array = [
   { from: ['abc'], to: 'abc' },
   { from: [123], to: '123' },
@@ -180,7 +180,7 @@ coercionArrayRules.array = {
 }
 
 describe("Type coercion", () => {
-  var ajv, fullAjv, instances
+  let ajv, fullAjv, instances
 
   beforeEach(() => {
     ajv = new Ajv({coerceTypes: true, verbose: true})
@@ -195,7 +195,7 @@ describe("Type coercion", () => {
       canCoerce /*, toType, fromType*/
     ) => {
       instances.forEach((_ajv) => {
-        var valid = _ajv.validate(schema, test.from)
+        const valid = _ajv.validate(schema, test.from)
         //if (valid !== canCoerce) console.log('true', toType, fromType, test, ajv.errors);
         valid.should.equal(canCoerce)
       })
@@ -207,39 +207,30 @@ describe("Type coercion", () => {
     fullAjv = new Ajv({coerceTypes: "array", verbose: true, allErrors: true})
     instances = [ajv, fullAjv]
 
-    testRules(
-      coercionArrayRules,
-      (test, schema, canCoerce, toType, fromType) => {
-        instances.forEach((_ajv) => {
-          var valid = _ajv.validate(schema, test.from)
-          if (valid !== canCoerce) {
-            console.log(toType, ".", fromType, test, schema, ajv.errors)
-          }
-          valid.should.equal(canCoerce)
-        })
-      }
-    )
+    testRules(coercionArrayRules, (test, schema, canCoerce, toType, fromType) => {
+      instances.forEach((_ajv) => {
+        const valid = _ajv.validate(schema, test.from)
+        if (valid !== canCoerce) console.log(toType, ".", fromType, test, schema, ajv.errors)
+        valid.should.equal(canCoerce)
+      })
+    })
   })
 
   it("should coerce values in objects/arrays and update properties/items", () => {
-    testRules(coercionRules, (
-      test,
-      schema,
-      canCoerce /*, toType, fromType*/
-    ) => {
-      var schemaObject = {
+    testRules(coercionRules, (test, schema, canCoerce /*, toType, fromType*/) => {
+      const schemaObject = {
         type: "object",
         properties: {
           foo: schema,
         },
       }
 
-      var schemaArray = {
+      const schemaArray = {
         type: "array",
         items: schema,
       }
 
-      var schemaArrObj = {
+      const schemaArrObj = {
         type: "array",
         items: schemaObject,
       }
@@ -251,7 +242,7 @@ describe("Type coercion", () => {
       })
 
       function testCoercion(_ajv, _schema, fromData, toData) {
-        var valid = _ajv.validate(_schema, fromData)
+        const valid = _ajv.validate(_schema, fromData)
         //if (valid !== canCoerce) console.log(schema, fromData, toData);
         valid.should.equal(canCoerce)
         if (valid) fromData.should.eql(toData)
@@ -260,7 +251,7 @@ describe("Type coercion", () => {
   })
 
   it("should coerce to multiple types in order with number type", () => {
-    var schema = {
+    const schema = {
       type: "object",
       properties: {
         foo: {
@@ -270,7 +261,7 @@ describe("Type coercion", () => {
     }
 
     instances.forEach((_ajv) => {
-      var data
+      let data
 
       _ajv.validate(schema, (data = {foo: "1"})).should.equal(true)
       data.should.eql({foo: 1})
@@ -302,7 +293,7 @@ describe("Type coercion", () => {
   })
 
   it("should coerce to multiple types in order with integer type", () => {
-    var schema = {
+    const schema = {
       type: "object",
       properties: {
         foo: {
@@ -312,7 +303,7 @@ describe("Type coercion", () => {
     }
 
     instances.forEach((_ajv) => {
-      var data
+      let data
 
       _ajv.validate(schema, (data = {foo: "1"})).should.equal(true)
       data.should.eql({foo: 1})
@@ -341,7 +332,7 @@ describe("Type coercion", () => {
   })
 
   it("should fail to coerce non-number if multiple properties/items are coerced (issue #152)", () => {
-    var schema = {
+    const schema = {
       type: "object",
       properties: {
         foo: {type: "number"},
@@ -349,17 +340,17 @@ describe("Type coercion", () => {
       },
     }
 
-    var schema2 = {
+    const schema2 = {
       type: "array",
       items: {type: "number"},
     }
 
     instances.forEach((_ajv) => {
-      var data = {foo: "123", bar: "bar"}
+      const data = {foo: "123", bar: "bar"}
       _ajv.validate(schema, data).should.equal(false)
       data.should.eql({foo: 123, bar: "bar"})
 
-      var data2 = ["123", "bar"]
+      const data2 = ["123", "bar"]
       _ajv.validate(schema2, data2).should.equal(false)
       data2.should.eql([123, "bar"])
     })
@@ -368,7 +359,7 @@ describe("Type coercion", () => {
   it("should update data if the schema is in ref that is not inlined", () => {
     instances.push(new Ajv({coerceTypes: true, inlineRefs: false}))
 
-    var schema = {
+    const schema = {
       type: "object",
       definitions: {
         foo: {type: "number"},
@@ -378,7 +369,7 @@ describe("Type coercion", () => {
       },
     }
 
-    var schema2 = {
+    const schema2 = {
       type: "object",
       definitions: {
         foo: {
@@ -393,14 +384,14 @@ describe("Type coercion", () => {
       },
     }
 
-    var schemaRecursive = {
+    const schemaRecursive = {
       type: ["object", "number"],
       properties: {
         foo: {$ref: "#"},
       },
     }
 
-    var schemaRecursive2 = {
+    const schemaRecursive2 = {
       $id: "http://e.com/schema.json#",
       definitions: {
         foo: {
@@ -427,7 +418,7 @@ describe("Type coercion", () => {
       )
 
       function testCoercion(_schema, fromData, toData) {
-        var valid = _ajv.validate(_schema, fromData)
+        const valid = _ajv.validate(_schema, fromData)
         // if (!valid) console.log(schema, fromData, toData);
         valid.should.equal(true)
         fromData.should.eql(toData)
@@ -436,13 +427,13 @@ describe("Type coercion", () => {
   })
 
   it("should generate one error for type with coerceTypes option (issue #469)", () => {
-    var schema = {
+    const schema = {
       type: "number",
       minimum: 10,
     }
 
     instances.forEach((_ajv) => {
-      var validate = _ajv.compile(schema)
+      const validate = _ajv.compile(schema)
       validate(9).should.equal(false)
       validate.errors.length.should.equal(1)
 
@@ -454,13 +445,13 @@ describe("Type coercion", () => {
   })
 
   it('should check "uniqueItems" after coercion', () => {
-    var schema = {
+    const schema = {
       items: {type: "number"},
       uniqueItems: true,
     }
 
     instances.forEach((_ajv) => {
-      var validate = _ajv.compile(schema)
+      const validate = _ajv.compile(schema)
       validate([1, "2", 3]).should.equal(true)
 
       validate([1, "2", 2]).should.equal(false)
@@ -470,13 +461,13 @@ describe("Type coercion", () => {
   })
 
   it('should check "contains" after coercion', () => {
-    var schema = {
+    const schema = {
       items: {type: "number"},
       contains: {const: 2},
     }
 
     instances.forEach((_ajv) => {
-      var validate = _ajv.compile(schema)
+      const validate = _ajv.compile(schema)
       validate([1, "2", 3]).should.equal(true)
 
       validate([1, "3", 4]).should.equal(false)
@@ -485,12 +476,12 @@ describe("Type coercion", () => {
   })
 
   function testRules(rules, cb) {
-    for (var toType in rules) {
-      for (var fromType in rules[toType]) {
-        var tests = rules[toType][fromType]
+    for (const toType in rules) {
+      for (const fromType in rules[toType]) {
+        const tests = rules[toType][fromType]
         tests.forEach((test) => {
-          var canCoerce = test.to !== undefined
-          var schema = canCoerce
+          const canCoerce = test.to !== undefined
+          const schema = canCoerce
             ? Array.isArray(test.to)
               ? {type: toType, items: {type: fromType, enum: [test.to[0]]}}
               : {type: toType, enum: [test.to]}
