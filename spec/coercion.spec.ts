@@ -1,3 +1,4 @@
+import type Ajv from ".."
 import _Ajv from "./ajv"
 require("./chai").should()
 
@@ -178,11 +179,11 @@ coercionArrayRules.array = {
 }
 
 describe("Type coercion", () => {
-  let ajv, fullAjv, instances
+  let ajv: Ajv, fullAjv: Ajv, instances: Ajv[]
 
   beforeEach(() => {
-    ajv = new _Ajv({coerceTypes: true, verbose: true})
-    fullAjv = new _Ajv({coerceTypes: true, verbose: true, allErrors: true})
+    ajv = new _Ajv({coerceTypes: true, verbose: true, allowUnionTypes: true})
+    fullAjv = new _Ajv({coerceTypes: true, verbose: true, allErrors: true, allowUnionTypes: true})
     instances = [ajv, fullAjv]
   })
 
@@ -355,7 +356,7 @@ describe("Type coercion", () => {
   })
 
   it("should update data if the schema is in ref that is not inlined", () => {
-    instances.push(new _Ajv({coerceTypes: true, inlineRefs: false}))
+    instances.push(new _Ajv({coerceTypes: true, inlineRefs: false, allowUnionTypes: true}))
 
     const schema = {
       type: "object",
@@ -400,6 +401,7 @@ describe("Type coercion", () => {
           },
         },
       },
+      type: "object",
       properties: {
         foo: {$ref: "http://e.com/foo.json#"},
       },
@@ -433,17 +435,18 @@ describe("Type coercion", () => {
     instances.forEach((_ajv) => {
       const validate = _ajv.compile(schema)
       validate(9).should.equal(false)
-      validate.errors.length.should.equal(1)
+      validate.errors?.length.should.equal(1)
 
       validate(11).should.equal(true)
 
       validate("foo").should.equal(false)
-      validate.errors.length.should.equal(1)
+      validate.errors?.length.should.equal(1)
     })
   })
 
   it('should check "uniqueItems" after coercion', () => {
     const schema = {
+      type: "array",
       items: {type: "number"},
       uniqueItems: true,
     }
@@ -453,13 +456,14 @@ describe("Type coercion", () => {
       validate([1, "2", 3]).should.equal(true)
 
       validate([1, "2", 2]).should.equal(false)
-      validate.errors.length.should.equal(1)
-      validate.errors[0].keyword.should.equal("uniqueItems")
+      validate.errors?.length.should.equal(1)
+      validate.errors?.[0].keyword.should.equal("uniqueItems")
     })
   })
 
   it('should check "contains" after coercion', () => {
     const schema = {
+      type: "array",
       items: {type: "number"},
       contains: {const: 2},
     }
@@ -469,7 +473,7 @@ describe("Type coercion", () => {
       validate([1, "2", 3]).should.equal(true)
 
       validate([1, "3", 4]).should.equal(false)
-      validate.errors.pop().keyword.should.equal("contains")
+      validate.errors?.pop()?.keyword.should.equal("contains")
     })
   })
 
