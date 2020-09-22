@@ -6,11 +6,75 @@ The fastest JSON Schema validator for Node.js and browser. Supports draft-06/07 
 
 [![Build Status](https://travis-ci.org/ajv-validator/ajv.svg?branch=master)](https://travis-ci.org/ajv-validator/ajv)
 [![npm](https://img.shields.io/npm/v/ajv.svg)](https://www.npmjs.com/package/ajv)
+[![npm (tag)](https://img.shields.io/npm/v/ajv/beta)](https://www.npmjs.com/package/ajv/v/7.0.0-beta.0)
 [![npm downloads](https://img.shields.io/npm/dm/ajv.svg)](https://www.npmjs.com/package/ajv)
 [![Coverage Status](https://coveralls.io/repos/github/ajv-validator/ajv/badge.svg?branch=master)](https://coveralls.io/github/ajv-validator/ajv?branch=master)
 [![Gitter](https://img.shields.io/gitter/room/ajv-validator/ajv.svg)](https://gitter.im/ajv-validator/ajv)
 [![GitHub Sponsors](https://img.shields.io/badge/$-sponsors-brightgreen)](https://github.com/sponsors/epoberezkin)
 
+## Using version 7 (beta)
+
+[Ajv version 7.0.0-beta.0](https://github.com/ajv-validator/ajv/releases/tag/v7.0.0-beta.0) is released:
+
+- to reduce the mistakes in JSON schemas and unexpected validation results, [strict mode](./docs/strict-mode.md) is added - it prohibits ignored or ambiguous JSON Schema elements.
+- to make code injection from untrusted schemas impossible, [code generation](./docs/codegen.md) is fully re-written to be safe.
+- to simplify Ajv extensions, the new keyword API that is used by pre-defined keywords is available to user-defined keywords - it is much easier to define any keywords now, especially with subschemas.
+- schemas are compiled to ES6 code (ES5 code generation is supported with an option).
+- the support for JSON-Schema draft-04 is removed - if you have schemas using "id" attributes you have to replace them with "\$id" (or continue using version 6 that will be supported until 02/28/2021).
+- all formats are separated to ajv-formats package - they have to be explicitely added if you use them.
+- to improve reliability and maintainability the code is migrated to TypeScript.
+
+See [release notes](https://github.com/ajv-validator/ajv/releases/tag/v7.0.0-beta.0) for the details.
+
+To install the new version:
+
+```bash
+npm install ajv@beta
+```
+
+See [Getting started](#usage) for code example.
+
+**Please note**: use [Ajv v6](https://github.com/ajv-validator/ajv) if you need draft-04 support - v7 does NOT support it.
+
+## Contents
+
+- [Mozilla MOSS grant and OpenJS Foundation](#mozilla-moss-grant-and-openjs-foundation)
+- [Sponsors](#sponsors)
+- [Performance](#performance)
+- [Features](#features)
+- [Getting started](#usage)
+- [Frequently Asked Questions](./docs/faq.md)
+- [Using in browser](#using-in-browser)
+  - [Content Security Policies](./docs/security.md#content-security-policies)
+- [Command line interface](#command-line-interface)
+- [API reference](./docs/api.md)
+  - [Methods](./docs/api.md#ajv-constructor-and-methods)
+  - [Options](./docs/api.md#options)
+  - [Validation errors](./docs/api.md#validation-errors)
+- NEW: [Strict mode](./docs/strict-mode.md#strict-mode)
+  - [Prohibit ignored keywords](./docs/strict-mode.md#prohibit-ignored-keywords)
+  - [Prevent unexpected validation](./docs/strict-mode.md#prevent-unexpected-validation)
+  - [Strict types](./docs/strict-mode.md#strict-types)
+  - [Strict number validation](./docs/strict-mode.md#strict-number-validation)
+- [Data validation](./docs/validation.md)
+  - [Validation basics](./docs/validation.md#validation-basics): [JSON Schema keywords](./docs/validation.md#validation-keywords), [annotations](./docs/validation.md#annotation-keywords), [formats](./docs/validation.md#formats)
+  - [Modular schemas](./docs/validation.md#modular-schemas): [combining with \$ref](./docs/validation.md#ref), [\$data reference](./docs/validation.md#data-reference), [$merge and $patch](./docs/validation.md#merge-and-patch-keywords)
+  - [Asynchronous schema compilation](./docs/validation.md#asynchronous-schema-compilation)
+  - [Asynchronous validation](./docs/validation.md#asynchronous-validation)
+  - [Modifying data](./docs/validation.md#modifying-data-during-validation): [additional properties](./docs/validation.md#removing-additional-properties), [defaults](./docs/validation.md#assigning-defaults), [type coercion](./docs/validation.md#coercing-data-types)
+- [User-defined keywords](./docs/keywords.md)
+- [Security considerations](./docs/security.md)
+  - [Security contact](./docs/security.md#security-contact)
+  - [Untrusted schemas](./docs/security.md#untrusted-schemas)
+  - [Circular references in objects](./docs/security.md#circular-references-in-javascript-objects)
+  - [Trusted schemas](./docs/security.md#security-risks-of-trusted-schemas)
+  - [ReDoS attack](./docs/security.md#redos-attack)
+  - [Content Security Policies](./docs/security.md#content-security-policies)
+- [Plugins](#plugins)
+- [Related packages](#related-packages)
+- [Some packages using Ajv](#some-packages-using-ajv)
+- [Tests, Contributing, Changes history](#tests)
+- [Support, Code of conduct, Contacts, License](#open-source-software-support)
 
 ## Mozilla MOSS grant and OpenJS Foundation
 
@@ -24,8 +88,7 @@ This [blog post](https://www.poberezkin.com/posts/2020-08-14-ajv-json-validator-
 
 I am looking for the long term maintainers of Ajv – working with [ReadySet](https://www.thereadyset.co/), also sponsored by Mozilla, to establish clear guidelines for the role of a "maintainer" and the contribution standards, and to encourage a wider, more inclusive, contribution from the community.
 
-
-## Please [sponsor Ajv development](https://github.com/sponsors/epoberezkin)
+## <a name="sponsors"></a>Please [sponsor Ajv development](https://github.com/sponsors/epoberezkin)
 
 Since I asked to support Ajv development 40 people and 6 organizations contributed via GitHub and OpenCollective - this support helped receiving the MOSS grant!
 
@@ -52,64 +115,6 @@ Thank you.
 <a href="https://opencollective.com/ajv/organization/8/website"><img src="https://opencollective.com/ajv/organization/8/avatar.svg"></a>
 <a href="https://opencollective.com/ajv/organization/9/website"><img src="https://opencollective.com/ajv/organization/9/avatar.svg"></a>
 
-## Using version 6
-
-[JSON Schema draft-07](http://json-schema.org/latest/json-schema-validation.html) is published.
-
-[Ajv version 6.0.0](https://github.com/ajv-validator/ajv/releases/tag/v6.0.0) that supports draft-07 is released. It may require either migrating your schemas or updating your code (to continue using draft-04 and v5 schemas, draft-06 schemas will be supported without changes).
-
-**Please note**: To use Ajv with draft-06 schemas you need to explicitly add the meta-schema to the validator instance:
-
-```javascript
-ajv.addMetaSchema(require("ajv/lib/refs/json-schema-draft-06.json"))
-```
-
-**Please note**: use Ajv v6 if you need draft-04 support - v7 does NOT support it.
-
-## Contents
-
-- [Performance](#performance)
-- [Features](#features)
-- [Getting started](#getting-started)
-- [Frequently Asked Questions](./DOCS/FAQ.md)
-- [Using in browser](#using-in-browser)
-  - [Ajv and Content Security Policies (CSP)](#ajv-and-content-security-policies-csp)
-- [Command line interface](#command-line-interface)
-- Validation
-  - [Strict mode](#strict-mode)
-    - [Prohibit ignored keywords](#prohibit-ignored-keywords)
-    - [Prevent unexpected validation](#prevent-unexpected-validation)
-    - [Strict types](#strict-types)
-    - [Number validation](#number-validation)
-  - [Keywords](#validation-keywords)
-  - [Annotation keywords](#annotation-keywords)
-  - [Formats](#formats)
-  - [Combining schemas with \$ref](#ref)
-  - [\$data reference](#data-reference)
-  - NEW: [$merge and $patch keywords](#merge-and-patch-keywords)
-  - [User-defined keywords](#user-defined-keywords)
-  - [Asynchronous schema compilation](#asynchronous-schema-compilation)
-  - [Asynchronous validation](#asynchronous-validation)
-- [Security considerations](#security-considerations)
-  - [Security contact](#security-contact)
-  - [Untrusted schemas](#untrusted-schemas)
-  - [Circular references in objects](#circular-references-in-javascript-objects)
-  - [Trusted schemas](#security-risks-of-trusted-schemas)
-  - [ReDoS attack](#redos-attack)
-- Modifying data during validation
-  - [Filtering data](#filtering-data)
-  - [Assigning defaults](#assigning-defaults)
-  - [Coercing data types](#coercing-data-types)
-- API
-  - [Methods](#api)
-  - [Options](#options)
-  - [Validation errors](#validation-errors)
-- [Plugins](#plugins)
-- [Related packages](#related-packages)
-- [Some packages using Ajv](#some-packages-using-ajv)
-- [Tests, Contributing, Changes history](#tests)
-- [Support, Code of conduct, License](#open-source-software-support)
-
 ## Performance
 
 Ajv generates code to turn JSON Schemas into super-fast validation functions that are efficient for v8 optimization.
@@ -128,33 +133,39 @@ Performance of different validators by [json-schema-benchmark](https://github.co
 ## Features
 
 - Ajv implements full JSON Schema [draft-06/07](http://json-schema.org/) standards (draft-04 is supported in v6):
-  - all validation keywords (see [JSON Schema validation keywords](./DOCS/JSON-SCHEMA.md))
+  - all validation keywords (see [JSON Schema validation keywords](./docs/json-schema.md))
   - keyword "nullable" from [Open API 3 specification](https://swagger.io/docs/specification/data-models/data-types/).
   - full support of remote refs (remote schemas have to be added with `addSchema` or compiled to be available)
   - support of circular references between schemas
   - correct string lengths for strings with unicode pairs
   - [formats](#formats) defined by JSON Schema draft-07 standard (with [ajv-formats](https://github.com/ajv-validator/ajv-formats) plugin) and additional formats (can be turned off)
-  - [validates schemas against meta-schema](#api-validateschema)
+  - [validates schemas against meta-schema](./docs/api.md#api-validateschema)
 - supports [browsers](#using-in-browser) and Node.js 0.10-14.x
-- [asynchronous loading](#asynchronous-schema-compilation) of referenced schemas during compilation
-- "All errors" validation mode with [option allErrors](#options)
-- [error messages with parameters](#validation-errors) describing error reasons to allow error message generation
+- [asynchronous loading](./docs/validation.md#asynchronous-schema-compilation) of referenced schemas during compilation
+- "All errors" validation mode with [option allErrors](./docs/api.md#options)
+- [error messages with parameters](./docs/api.md#validation-errors) describing error reasons to allow error message generation
 - i18n error messages support with [ajv-i18n](https://github.com/ajv-validator/ajv-i18n) package
-- [filtering data](#filtering-data) from additional properties
-- [assigning defaults](#assigning-defaults) to missing properties and items
-- [coercing data](#coercing-data-types) to the types specified in `type` keywords
-- [user-defined keywords](user-defined-keywords)
+- [removing-additional-properties](./docs/validation.md#removing-additional-properties)
+- [assigning defaults](./docs/validation.md#assigning-defaults) to missing properties and items
+- [coercing data](./docs/validation.md#coercing-data-types) to the types specified in `type` keywords
+- [user-defined keywords](#user-defined-keywords)
 - draft-06/07 keywords `const`, `contains`, `propertyNames` and `if/then/else`
 - draft-06 boolean schemas (`true`/`false` as a schema to always pass/fail).
-- keywords `switch`, `patternRequired`, `formatMaximum` / `formatMinimum` and `formatExclusiveMaximum` / `formatExclusiveMinimum` from [JSON Schema extension proposals](https://github.com/json-schema/json-schema/wiki/v5-Proposals) with [ajv-keywords](https://github.com/ajv-validator/ajv-keywords) package
-- [\$data reference](#data-reference) to use values from the validated data as values for the schema keywords
-- [asynchronous validation](#asynchronous-validation) of user-defined formats and keywords
+- assitional extension keywords with [ajv-keywords](https://github.com/ajv-validator/ajv-keywords) package
+- [\$data reference](./docs/validation.md#data-reference) to use values from the validated data as values for the schema keywords
+- [asynchronous validation](./docs/api.md#asynchronous-validation) of user-defined formats and keywords
 
 
 ## Install
 
 ```
 npm install ajv
+```
+
+To install version 7 beta:
+
+```
+npm install ajv@beta
 ```
 
 ## <a name="usage"></a>Getting started
@@ -221,17 +232,19 @@ if (validate(data)) {
 }
 ```
 
-See [this test](./spec/types/json-schema.spec.ts) for an advanced example, [API](#api) and [Options](#options) for more details.
+See [this test](./spec/types/json-schema.spec.ts) for an advanced example, [API reference](./docs/api.md) and [Options](./docs/api.md#options) for more details.
 
 Ajv compiles schemas to functions and caches them in all cases (using schema itself as a key for Map) or another function passed via options), so that the next time the same schema is used (not necessarily the same object instance) it won't be compiled again.
 
 The best performance is achieved when using compiled functions returned by `compile` or `getSchema` methods (there is no additional function call).
 
-**Please note**: every time a validation function or `ajv.validate` are called `errors` property is overwritten. You need to copy `errors` array reference to another variable if you want to use it later (e.g., in the callback). See [Validation errors](#validation-errors)
+**Please note**: every time a validation function or `ajv.validate` are called `errors` property is overwritten. You need to copy `errors` array reference to another variable if you want to use it later (e.g., in the callback). See [Validation errors](./docs/api.md#validation-errors)
 
 ## Using in browser
 
-It is recommended that you bundle Ajv together with your code.
+See [Content Security Policies](./docs/security.md#content-security-policies) to decide the best approach how to use Ajv in the browser.
+
+Whether you use Ajv or compiled schemas, it is recommended that you bundle them together with your code.
 
 If you need to use Ajv in several bundles you can create a separate UMD bundle using `npm run bundle` script (thanks to [siddo420](https://github.com/siddo420)).
 
@@ -246,15 +259,6 @@ This bundle can be used with different module systems; it creates global `Ajv` i
 The browser bundle is available on [cdnjs](https://cdnjs.com/libraries/ajv).
 
 **Please note**: some frameworks, e.g. Dojo, may redefine global require in such way that is not compatible with CommonJS module format. In such case Ajv bundle has to be loaded before the framework and then you can use global Ajv (see issue [#234](https://github.com/ajv-validator/ajv/issues/234)).
-
-### Ajv and Content Security Policies (CSP)
-
-If you're using Ajv to compile a schema (the typical use) in a browser document that is loaded with a Content Security Policy (CSP), that policy will require a `script-src` directive that includes the value `'unsafe-eval'`.
-:warning: NOTE, however, that `unsafe-eval` is NOT recommended in a secure CSP[[1]](https://developer.chrome.com/extensions/contentSecurityPolicy#relaxing-eval), as it has the potential to open the document to cross-site scripting (XSS) attacks.
-
-In order to make use of Ajv without easing your CSP, you can [pre-compile a schema using the CLI](https://github.com/ajv-validator/ajv-cli#compile-schemas). This will transpile the schema JSON into a JavaScript file that exports a `validate` function that works simlarly to a schema compiled at runtime.
-
-Note that pre-compilation of schemas is performed using [ajv-pack](https://github.com/ajv-validator/ajv-pack) and there are [some limitations to the schema features it can compile](https://github.com/ajv-validator/ajv-pack#limitations). A successfully pre-compiled schema is equivalent to the same schema compiled at runtime.
 
 ## Command line interface
 
@@ -271,402 +275,86 @@ CLI is available as a separate npm package [ajv-cli](https://github.com/ajv-vali
 - all Ajv options
 - reporting changes in data after validation in [JSON-patch](https://tools.ietf.org/html/rfc6902) format
 
-## Strict mode
+## Plugins
 
-Strict mode intends to prevent any unexpected behaviours or silently ignored mistakes in user schemas. It does not change any validation results compared with JSON Schema specification, but it makes some schemas invalid and throws exception or logs warning (with `strict: "log"` option) in case any restriction is violated.
+Ajv can be extended with plugins that add keywords, formats or functions to process generated code. When such plugin is published as npm package it is recommended that it follows these conventions:
 
-The strict mode restrictions are below. To disable these restrictions use option `strict: false`.
+- it exports a function
+- this function accepts ajv instance as the first parameter and returns the same instance to allow chaining
+- this function can accept an optional configuration as the second parameter
 
-### Prohibit ignored keywords
+Youcan import `Plugin` interface from ajv if you use Typescript.
 
-#### Prohibit unknown keywords
+If you have published a useful plugin please submit a PR to add it to the next section.
 
-JSON Schema [section 6.5](https://tools.ietf.org/html/draft-handrews-json-schema-02#section-6.5) requires to ignore unknown keywords. The motivation is to increase cross-platform portability of schemas, so that implementations that do not support certain keywords can still do partial validation.
+## Related packages
 
-The problems with this approach are:
+- [ajv-bsontype](https://github.com/BoLaMN/ajv-bsontype) - plugin to validate mongodb's bsonType formats
+- [ajv-cli](https://github.com/jessedc/ajv-cli) - command line interface
+- [ajv-formats](https://github.com/ajv-validator/ajv-formats) - formats defined in JSON Schema specification.
+- [ajv-errors](https://github.com/ajv-validator/ajv-errors) - plugin for defining error messages in the schema
+- [ajv-i18n](https://github.com/ajv-validator/ajv-i18n) - internationalised error messages
+- [ajv-istanbul](https://github.com/ajv-validator/ajv-istanbul) - plugin to instrument generated validation code to measure test coverage of your schemas
+- [ajv-keywords](https://github.com/ajv-validator/ajv-keywords) - plugin with additional validation keywords (select, typeof, etc.)
+- [ajv-merge-patch](https://github.com/ajv-validator/ajv-merge-patch) - plugin with keywords $merge and $patch
+- [ajv-pack](https://github.com/ajv-validator/ajv-pack) - produces a compact module exporting validation functions
+- [ajv-formats-draft2019](https://github.com/luzlab/ajv-formats-draft2019) - format validators for draft2019 that aren't included in [ajv-formats](https://github.com/ajv-validator/ajv-formats) (ie. `idn-hostname`, `idn-email`, `iri`, `iri-reference` and `duration`).
 
-- Different validation results with the same schema and data, leading to bugs and inconsistent behaviours.
-- Typos in keywords resulting in keywords being quietly ignored, requiring extensive test coverage of schemas to avoid these mistakes.
+## Some packages using Ajv
 
-By default Ajv fails schema compilation when unknown keywords are used. Users can explicitly define the keywords that should be allowed and ignored:
+- [webpack](https://github.com/webpack/webpack) - a module bundler. Its main purpose is to bundle JavaScript files for usage in a browser
+- [jsonscript-js](https://github.com/JSONScript/jsonscript-js) - the interpreter for [JSONScript](http://www.jsonscript.org) - scripted processing of existing endpoints and services
+- [osprey-method-handler](https://github.com/mulesoft-labs/osprey-method-handler) - Express middleware for validating requests and responses based on a RAML method object, used in [osprey](https://github.com/mulesoft/osprey) - validating API proxy generated from a RAML definition
+- [har-validator](https://github.com/ahmadnassri/har-validator) - HTTP Archive (HAR) validator
+- [jsoneditor](https://github.com/josdejong/jsoneditor) - a web-based tool to view, edit, format, and validate JSON http://jsoneditoronline.org
+- [JSON Schema Lint](https://github.com/nickcmaynard/jsonschemalint) - a web tool to validate JSON/YAML document against a single JSON Schema http://jsonschemalint.com
+- [objection](https://github.com/vincit/objection.js) - SQL-friendly ORM for Node.js
+- [table](https://github.com/gajus/table) - formats data into a string table
+- [ripple-lib](https://github.com/ripple/ripple-lib) - a JavaScript API for interacting with [Ripple](https://ripple.com) in Node.js and the browser
+- [restbase](https://github.com/wikimedia/restbase) - distributed storage with REST API & dispatcher for backend services built to provide a low-latency & high-throughput API for Wikipedia / Wikimedia content
+- [hippie-swagger](https://github.com/CacheControl/hippie-swagger) - [Hippie](https://github.com/vesln/hippie) wrapper that provides end to end API testing with swagger validation
+- [react-form-controlled](https://github.com/seeden/react-form-controlled) - React controlled form components with validation
+- [rabbitmq-schema](https://github.com/tjmehta/rabbitmq-schema) - a schema definition module for RabbitMQ graphs and messages
+- [@query/schema](https://www.npmjs.com/package/@query/schema) - stream filtering with a URI-safe query syntax parsing to JSON Schema
+- [chai-ajv-json-schema](https://github.com/peon374/chai-ajv-json-schema) - chai plugin to us JSON Schema with expect in mocha tests
+- [grunt-jsonschema-ajv](https://github.com/SignpostMarv/grunt-jsonschema-ajv) - Grunt plugin for validating files against JSON Schema
+- [extract-text-webpack-plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin) - extract text from bundle into a file
+- [electron-builder](https://github.com/electron-userland/electron-builder) - a solution to package and build a ready for distribution Electron app
+- [addons-linter](https://github.com/mozilla/addons-linter) - Mozilla Add-ons Linter
+- [gh-pages-generator](https://github.com/epoberezkin/gh-pages-generator) - multi-page site generator converting markdown files to GitHub pages
+- [ESLint](https://github.com/eslint/eslint) - the pluggable linting utility for JavaScript and JSX
 
-```javascript
-ajv.addKeyword("allowedKeyword")
+## Tests
+
+```
+npm install
+git submodule update --init
+npm test
 ```
 
-or
+## Contributing
 
-```javascript
-ajv.addVocabulary(["allowed1", "allowed2"])
-```
+`npm run build` - compiles typescript to dist folder.
 
-#### Prohibit ignored "additionalItems" keyword
+`npm run watch` - automatically compiles typescript when files in lib folder change
 
-JSON Schema section [9.3.1.2](https://tools.ietf.org/html/draft-handrews-json-schema-02#section-9.3.1.2) requires to ignore "additionalItems" keyword if "items" keyword is absent or if it is not an array of items. This is inconsistent with the interaction of "additionalProperties" and "properties", and may cause unexpected results.
+Please see [Contributing guidelines](./CONTRIBUTING.md)
 
-By default Ajv fails schema compilation when "additionalItems" is used without "items" (or if "items" is not an array).
+## Changes history
 
-#### Prohibit unconstrained tuples
+See https://github.com/ajv-validator/ajv/releases
 
-Ajv also logs a warning if "items" is an array (for schema that defines a tuple) but neiter "minItems" nor "additionalItems"/"maxItems" keyword is present (or have a wrong value):
+[Changes in version 7.0.0-alpha.2](https://github.com/ajv-validator/ajv/releases/tag/v7.0.0-beta.0).
 
-```javascript
-{
-  type: "array",
-  items: [{type: "number"}, {type: "boolean"}]
-}
-```
+[Changes in version 6.0.0](https://github.com/ajv-validator/ajv/releases/tag/v6.0.0).
 
-The above schema may have a mistake, as tuples usually are expected to have a fixed size. To "fix" it:
+## Code of conduct
 
-```javascript
-{
-  type: "array",
-  items: [{type: "number"}, {type: "boolean"}],
-  minItems: 2,
-  additionalItems: false
-  // or
-  // maxItems: 2
-}
-```
+Please review and follow the [Code of conduct](./CODE_OF_CONDUCT.md).
 
-Sometimes users accidentally create schema for unit (a tuple with one item) that only validates the first item, this restriction prevents this mistake as well.
+Please report any unacceptable behaviour to ajv.validator@gmail.com - it will be reviewed by the project team.
 
-Use `strictTuples` option to suppress this warning (`false`) or turn it into exception (`true`).
-
-If you use `JSONSchemaType<T>` this mistake will also be prevented on a type level.
-
-#### Prohibit ignored "if", "then", "else" keywords
-
-JSON Schema section [9.2.2](https://tools.ietf.org/html/draft-handrews-json-schema-02#section-9.2.2) requires to ignore "if" (only annotations are collected) if both "then" and "else" are absent, and ignore "then"/"else" if "if" is absent.
-
-By default Ajv fails schema compilation in these cases.
-
-#### Prohibit unknown formats
-
-By default unknown formats throw exception during schema compilation (and fail validation in case format keyword value is [\$data reference](#data-reference)). It is possible to opt out of format validation completely with options `validateFormats: false`. You can define all known formats with `addFormat` method or `formats` option - to have some format ignored pass `true` as its definition:
-
-```javascript
-const ajv = new Ajv({formats: {
-  reserved: true
-})
-```
-
-Standard JSON Schema formats are provided in [ajv-formats](https://github.com/ajv-validator/ajv-formats) package - see [Formats](#formats) section.
-
-#### Prohibit ignored defaults
-
-With `useDefaults` option Ajv modifies validated data by assigning defaults from the schema, but there are different limitations when the defaults can be ignored (see [Assigning defaults](#assigning-defaults)). In strict mode Ajv fails schema compilation if such defaults are used in the schema.
-
-### Prevent unexpected validation
-
-#### Prohibit overlap between "properties" and "patternProperties" keywords
-
-The expectation of users (see #196, #286) is that "patternProperties" only apply to properties not already defined in "properties" keyword, but JSON Schema section [9.3.2](https://tools.ietf.org/html/draft-handrews-json-schema-02#section-9.3.2) defines these two keywords as independent. It means that to some properties two subschemas can be applied - one defined in "properties" keyword and another defined in "patternProperties" for the pattern matching this property.
-
-By default Ajv fails schema compilation if a pattern in "patternProperties" matches a property in "properties" in the same schema.
-
-In addition to allowing such patterns by using option `strict: false`, there is an option `allowMatchingProperties: true` to only allow this case without disabling other strict mode restrictions - there are some rare cases when this is necessary.
-
-To reiterate, neither this nor other strict mode restrictions change the validation results - they only restrict which schemas are valid.
-
-### Strict types
-
-An additional option `strictTypes` ("log" by default) imposes additional restrictions on how type keyword is used:
-
-#### Union types
-
-With `srictTypes` option "type" keywords with multiple types (other than with "null") are prohibited.
-
-Invalid:
-
-```javascript
-{
-  type: ["string", "number"]
-}
-```
-
-Valid:
-
-```javascript
-{
-  type: ["object", "null"]
-}
-```
-
-and
-
-```javascript
-{
-  type: "object",
-  nullable: true
-}
-```
-
-Unions can still be defined with `anyOf` keyword.
-
-The motivation for this restriction is that "type" is usually not the only keyword in the schema, and mixing other keywords that apply to different types is confusing. It is also consistent with wider range of versions of OpenAPI specification and has better tooling support. E.g., this example violating `strictTypes`:
-
-```javascript
-{
-  type: ["number", "array"],
-  minimum: 0,
-  items: {
-    type: "number",
-    minimum: 0
-  }
-}
-```
-
-is equivalent to this complying example, that is more verbose but also easier to maintain:
-
-```javascript
-{
-  anyOf: [
-    {
-      type: "number",
-      minimum: 0,
-    },
-    {
-      type: "array",
-      items: {
-        type: "number",
-        minimum: 0,
-      },
-    },
-  ]
-}
-```
-
-It also can be refactored:
-
-```javascript
-{
-  $defs: {
-    item: {
-      type: "number",
-      minimum: 0
-    }
-  },
-  anyOf: [
-    {$ref: "#/$defs/item"},
-    {
-      type: "array",
-      items: {$ref: "#/$defs/item"}
-    },
-  ]
-}
-```
-
-This restriction can be lifted separately from other `strictTypes` restrictions with `allowUnionTypes: true` option.
-
-#### Contradictory types
-
-Subschemas can apply to the same data instance, and it is possible to have contradictory type keywords - it usually indicate some mistake. For example:
-
-```javascript
-{
-  type: "object",
-  anyOf: [
-    {type: "array"},
-    {type: "object"}
-  ]
-}
-```
-
-The schema above violates `strictTypes` as "array" type is not compatible with object. If you used `allowUnionTypes: true` option, the above schema can be fixed in this way:
-
-```javascript
-{
-  type: ["array", "object"],
-  anyOf: [
-    {type: "array"},
-    {type: "object"}
-  ]
-}
-```
-
-**Please note**: type "number" can be narrowed to "integer", the opposite would violate `strictTypes`.
-
-#### Applicable types
-
-This simple JSON Schema is valid, but it violates `strictTypes`:
-
-```javascript
-{
-  properties: {
-    foo: {type: "number"},
-    bar: {type: "string"}
-  }
-  required: ["foo", "bar"]
-}
-```
-
-This is a very common mistake that even people experienced with JSON Schema often make - the problem here is that any value that is not an object would be valid against this schema - this is rarely intentional.
-
-To fix it, "type" keyword has to be added:
-
-```javascript
-{
-  type: "object",
-  properties: {
-    foo: {type: "number"},
-    bar: {type: "string"}
-  },
-  required: ["foo", "bar"]
-}
-```
-
-You do not necessarily have to have "type" keyword in the same schema object; as long as there is "type" keyword applying to the same part of data instance in the same schema document, not via "\$ref", it will be ok:
-
-```javascript
-{
-  type: "object",
-  anyOf: [
-    {
-      properties: {foo: {type: "number"}}
-      required: ["foo"]
-    },
-    {
-      properties: {bar: {type: "string"}}
-      required: ["bar"]
-    }
-  ]
-}
-```
-
-Both "properties" and "required" need `type: "object"` to satisfy `strictTypes` - it is sufficient to have it once in the parent schema, without repeating it in each schema.
-
-### Number validation
-
-Strict mode also affects number validation. By default Ajv fails `{"type": "number"}` (or `"integer"`) validation for `Infinity` and `NaN`.
-
-## Validation keywords
-
-Ajv supports all validation keywords from draft-07 of JSON Schema standard:
-
-- [type](./DOCS/JSON-SCHEMA.md#type)
-- [for numbers](./DOCS/JSON-SCHEMA.md#keywords-for-numbers) - maximum, minimum, exclusiveMaximum, exclusiveMinimum, multipleOf
-- [for strings](./DOCS/JSON-SCHEMA.md#keywords-for-strings) - maxLength, minLength, pattern, format
-- [for arrays](./DOCS/JSON-SCHEMA.md#keywords-for-arrays) - maxItems, minItems, uniqueItems, items, additionalItems, [contains](./DOCS/JSON-SCHEMA.md#contains)
-- [for objects](./DOCS/JSON-SCHEMA.md#keywords-for-objects) - maxProperties, minProperties, required, properties, patternProperties, additionalProperties, dependencies, [propertyNames](./DOCS/JSON-SCHEMA.md#propertynames)
-- [for all types](./DOCS/JSON-SCHEMA.md#keywords-for-all-types) - enum, [const](./DOCS/JSON-SCHEMA.md#const)
-- [compound keywords](./DOCS/JSON-SCHEMA.md#compound-keywords) - not, oneOf, anyOf, allOf, [if/then/else](./DOCS/JSON-SCHEMA.md#ifthenelse)
-
-With [ajv-keywords](https://github.com/ajv-validator/ajv-keywords) package Ajv also supports validation keywords from [JSON Schema extension proposals](https://github.com/json-schema/json-schema/wiki/v5-Proposals) for JSON Schema standard:
-
-- [patternRequired](./DOCS/JSON-SCHEMA.md#patternrequired-proposed) - like `required` but with patterns that some property should match.
-- [formatMaximum, formatMinimum, formatExclusiveMaximum, formatExclusiveMinimum](./DOCS/JSON-SCHEMA.md#formatmaximum--formatminimum-and-exclusiveformatmaximum--exclusiveformatminimum-proposed) - setting limits for date, time, etc.
-
-See [JSON Schema validation keywords](./DOCS/JSON-SCHEMA.md) for more details.
-
-## Annotation keywords
-
-JSON Schema specification defines several annotation keywords that describe schema itself but do not perform any validation.
-
-- `title` and `description`: information about the data represented by that schema
-- `$comment` (NEW in draft-07): information for developers. With option `$comment` Ajv logs or passes the comment string to the user-supplied function. See [Options](#options).
-- `default`: a default value of the data instance, see [Assigning defaults](#assigning-defaults).
-- `examples` (NEW in draft-06): an array of data instances. Ajv does not check the validity of these instances against the schema.
-- `readOnly` and `writeOnly` (NEW in draft-07): marks data-instance as read-only or write-only in relation to the source of the data (database, api, etc.).
-- `contentEncoding`: [RFC 2045](https://tools.ietf.org/html/rfc2045#section-6.1), e.g., "base64".
-- `contentMediaType`: [RFC 2046](https://tools.ietf.org/html/rfc2046), e.g., "image/png".
-
-**Please note**: Ajv does not implement validation of the keywords `examples`, `contentEncoding` and `contentMediaType` but it reserves them. If you want to create a plugin that implements some of them, it should remove these keywords from the instance.
-
-## Formats
-
-From version 7 Ajv does not include formats defined by JSON Schema specification - these and several other formats are provided by [ajv-formats](https://github.com/ajv-validator/ajv-formats) plugin.
-
-To add all formats from this plugin:
-
-```javascript
-import Ajv from "ajv"
-import addFormats from "ajv-formats"
-
-const ajv = new Ajv()
-addFormats(ajv)
-```
-
-See ajv-formats documentation for further details.
-
-It is recommended NOT to use "format" keyword implementations with untrusted data, as they use potentially unsafe regular expressions - see [ReDoS attack](#redos-attack).
-
-**Please note**: if you need to use "format" keyword to validate untrusted data, you MUST assess their suitability and safety for your validation scenarios.
-
-The following formats are defined in [ajv-formats](https://github.com/ajv-validator/ajv-formats) for string validation with "format" keyword:
-
-- _date_: full-date according to [RFC3339](http://tools.ietf.org/html/rfc3339#section-5.6).
-- _time_: time with optional time-zone.
-- _date-time_: date-time from the same source (time-zone is mandatory).
-- _uri_: full URI.
-- _uri-reference_: URI reference, including full and relative URIs.
-- _uri-template_: URI template according to [RFC6570](https://tools.ietf.org/html/rfc6570)
-- _url_ (deprecated): [URL record](https://url.spec.whatwg.org/#concept-url).
-- _email_: email address.
-- _hostname_: host name according to [RFC1034](http://tools.ietf.org/html/rfc1034#section-3.5).
-- _ipv4_: IP address v4.
-- _ipv6_: IP address v6.
-- _regex_: tests whether a string is a valid regular expression by passing it to RegExp constructor.
-- _uuid_: Universally Unique IDentifier according to [RFC4122](http://tools.ietf.org/html/rfc4122).
-- _json-pointer_: JSON-pointer according to [RFC6901](https://tools.ietf.org/html/rfc6901).
-- _relative-json-pointer_: relative JSON-pointer according to [this draft](http://tools.ietf.org/html/draft-luff-relative-json-pointer-00).
-
-**Please note**: JSON Schema draft-07 also defines formats `iri`, `iri-reference`, `idn-hostname` and `idn-email` for URLs, hostnames and emails with international characters. These formats are available in [ajv-formats-draft2019](https://github.com/luzlab/ajv-formats-draft2019) plugin.
-
-You can add and replace any formats using [addFormat](#api-addformat) method.
-
-## <a name="ref"></a>Combining schemas with \$ref
-
-You can structure your validation logic across multiple schema files and have schemas reference each other using `$ref` keyword.
-
-Example:
-
-```javascript
-const schema = {
-  $id: "http://example.com/schemas/schema.json",
-  type: "object",
-  properties: {
-    foo: {$ref: "defs.json#/definitions/int"},
-    bar: {$ref: "defs.json#/definitions/str"},
-  },
-}
-
-const defsSchema = {
-  $id: "http://example.com/schemas/defs.json",
-  definitions: {
-    int: {type: "integer"},
-    str: {type: "string"},
-  },
-}
-```
-
-Now to compile your schema you can either pass all schemas to Ajv instance:
-
-```javascript
-const ajv = new Ajv({schemas: [schema, defsSchema]})
-const validate = ajv.getSchema("http://example.com/schemas/schema.json")
-```
-
-or use `addSchema` method:
-
-```javascript
-const ajv = new Ajv()
-const validate = ajv.addSchema(defsSchema).compile(schema)
-```
-
-See [Options](#options) and [addSchema](#api) method.
-
-**Please note**:
-
-- `$ref` is resolved as the uri-reference using schema \$id as the base URI (see the example).
-- References can be recursive (and mutually recursive) to implement the schemas for different data structures (such as linked lists, trees, graphs, etc.).
-- You don't have to host your schema files at the URIs that you use as schema \$id. These URIs are only used to identify the schemas, and according to JSON Schema specification validators should not expect to be able to download the schemas from these URIs.
-- The actual location of the schema file in the file system is not used.
-- You can pass the identifier of the schema as the second parameter of `addSchema` method or as a property name in `schemas` option. This identifier can be used instead of (or in addition to) schema \$id.
-- You cannot have the same \$id (or the schema identifier) used for more than one schema - the exception will be thrown.
-- You can implement dynamic resolution of the referenced schemas using `compileAsync` method. In this way you can store schemas in any system (files, web, database, etc.) and reference them without explicitly adding to Ajv instance. See [Asynchronous schema compilation](#asynchronous-schema-compilation).
-
+<<<<<<< HEAD
 ## \$data reference
 
 With `$data` option you can use values from the validated data as the values for the schema keywords. See [proposal](https://github.com/json-schema-org/json-schema-spec/issues/51) for more information about how it works.
@@ -757,13 +445,8 @@ Using `$patch`:
       properties: {p: {type: "string"}},
       additionalProperties: false
     },
-<<<<<<< HEAD
-    "with": [
-      {"op": "add", "path": "/properties/q", "value": {"type": "number"}}
-    ]
-=======
+
     with: [{op: "add", path: "/properties/q", value: {type: "number"}}]
->>>>>>> docs: move to DOCS folder, update FAQ (closes #874), update examples in JSON-SCHEMA.md (previously KEYWORDS.md), rename CUSTOM.md to KEYWORDS.md
   }
 }
 ```
@@ -940,11 +623,15 @@ See [Options](#options).
 JSON Schema, if properly used, can replace data sanitisation. It doesn't replace other API security considerations. It also introduces additional security aspects to consider.
 
 ##### Security contact
+=======
+## Security contact
+>>>>>>> split readme to files, fix links
 
 To report a security vulnerability, please use the
 [Tidelift security contact](https://tidelift.com/security).
 Tidelift will coordinate the fix and disclosure. Please do NOT report security vulnerabilities via GitHub issues.
 
+<<<<<<< HEAD
 ##### Untrusted schemas
 
 Ajv treats JSON schemas as trusted as your application code. This security model is based on the most common use case, when the schemas are static and bundled together with the application.
@@ -1814,6 +1501,8 @@ Please review and follow the [Code of conduct](./CODE_OF_CONDUCT.md).
 
 Please report any unacceptable behaviour to ajv.validator@gmail.com - it will be reviewed by the project team.
 
+=======
+>>>>>>> split readme to files, fix links
 ## Open-source software support
 
 Ajv is a part of [Tidelift subscription](https://tidelift.com/subscription/pkg/npm-ajv?utm_source=npm-ajv&utm_medium=referral&utm_campaign=readme) - it provides a centralised support to open-source software users, in addition to the support provided by software maintainers.
