@@ -21,7 +21,8 @@ export function schemaKeywords(
     gen.block(() => keywordCode(it, "$ref", (RULES.all.$ref as Rule).definition)) // TODO typecast
     return
   }
-  if (!opts.jtd) checkStrictTypes(it, types)
+  checkStrictTypes(it, types)
+  checkRequired(it)
   gen.block(() => {
     for (const group of RULES.rules) groupKeywords(group)
     groupKeywords(RULES.post)
@@ -59,6 +60,18 @@ function iterateKeywords(it: SchemaObjCxt, group: RuleGroup): void {
       }
     }
   })
+}
+
+function checkRequired(it: SchemaObjCxt): void {
+  if (it.schemaEnv.meta || !it.opts.strictTypes) return
+  if (!it.schema.required) return
+  if (Array.isArray(it.schema.required)) {
+    it.schema.required.forEach((key) => {
+      if (it.schema.properties && it.schema.properties[key] === undefined) {
+        strictRequiredError(it, `required key "${key}" does not exist as a property`)
+      }
+    })
+  }
 }
 
 function checkStrictTypes(it: SchemaObjCxt, types: JSONType[]): void {
@@ -112,5 +125,11 @@ function includesType(ts: JSONType[], t: JSONType): boolean {
 function strictTypesError(it: SchemaObjCxt, msg: string): void {
   const schemaPath = it.schemaEnv.baseId + it.errSchemaPath
   msg += ` at "${schemaPath}" (strictTypes)`
+  checkStrictMode(it, msg, it.opts.strictTypes)
+}
+
+function strictRequiredError(it: SchemaObjCxt, msg: string): void {
+  const schemaPath = it.schemaEnv.baseId + it.errSchemaPath
+  msg += ` at "${schemaPath}" (strictRequired)`
   checkStrictMode(it, msg, it.opts.strictTypes)
 }
