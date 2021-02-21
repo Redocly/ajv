@@ -4,22 +4,41 @@ Strict mode intends to prevent any unexpected behaviours or silently ignored mis
 
 To disable all strict mode restrictions use option `strict: false`. Some of the restrictions can be changed with their own options
 
-- [Prohibit ignored keywords](#prohibit-ignored-keywords)
-  - unknown keywords
-  - ignored "additionalItems" keyword
-  - ignored "if", "then", "else" keywords
-  - ignored "contains", "maxContains" and "minContains" keywords
-  - unknown formats
-  - ignored defaults
-- [Prevent unexpected validation](#prevent-unexpected-validation)
-  - overlap between "properties" and "patternProperties" keywords (also `allowMatchingProperties` option)
-  - unconstrained tuples (also `strictTuples` option)
-- [Strict types](#strict-types) (also `strictTypes` option)
-  - union types (also `allowUnionTypes` option)
-  - contradictory types
-  - require applicable types
-- [Strict number validation](#strict-number-validation)
-- [Strict required](#strict-required)
+- [JSON Type Definition schemas](#json-type-definition-schemas)
+- [JSON Schema schemas](#json-schema-schemas)
+  - [Prohibit ignored keywords](#prohibit-ignored-keywords)
+    - unknown keywords
+    - ignored "additionalItems" keyword
+    - ignored "if", "then", "else" keywords
+    - ignored "contains", "maxContains" and "minContains" keywords
+    - unknown formats
+    - ignored defaults
+  - [Prevent unexpected validation](#prevent-unexpected-validation)
+    - overlap between "properties" and "patternProperties" keywords (also `allowMatchingProperties` option)
+    - required properties have to be present in properties [Strict required](#strict-required)  
+    - unconstrained tuples (also `strictTuples` option)
+  - [Strict types](#strict-types) (also `strictTypes` option)
+    - union types (also `allowUnionTypes` option)
+    - contradictory types
+    - require applicable types
+  - [Strict number validation](#strict-number-validation)
+
+## JSON Type Definition schemas
+
+JTD specification is strict - whether Ajv strict mode is enabled or not it will not allow schemas with ignored or ambiguous elements, including:
+
+- unknown schema keywords
+- combining multiple schema forms in one schema
+- defining the same property as both required and optional
+- re-defining discriminator tag inside properties, even if the definition is non-contradictory
+
+See [JSON Type Definition](./json-type-definition.md) for informal and [RFC8927](https://datatracker.ietf.org/doc/rfc8927/) for formal specification descriptions.
+
+The only change that strict mode introduces to JTD schemas, without changing their syntax or semantics, is the requirement that all members that are present in optional `metadata` members are defined as Ajv keywords. This restriction can be disabled with `strict: false` option, without any impact to other JTD features.
+
+## JSON Schema schemas
+
+JSON Schema specification is very permissive and allows many elements in the schema to be quietly ignored or be ambiguous. It is recommended to use JSON Schema with strict mode.
 
 ### Prohibit ignored keywords
 
@@ -296,4 +315,4 @@ Strict mode also affects number validation. By default Ajv fails `{"type": "numb
 
 ### Strict required
 
-An additional option `strictRequired` ("log" by default) validates that the `required` keyword contains only keys that are explicitly defined in the `properties` key of the object they are referencing.
+Often times a typo can lead to a key being set as required that is not even present in the object. `strictRequired` validates that the `required` keyword contains only keys that are explicitly defined in the `properties` key of the object they are referencing.
