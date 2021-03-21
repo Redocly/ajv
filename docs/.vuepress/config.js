@@ -1,7 +1,7 @@
 const {slugify} = require("@vuepress/shared-utils")
 
 module.exports = {
-  title: "Ajv: Another JSON validator",
+  title: "Ajv JSON schema validator",
   description: "Just playing around",
   markdown: {
     slugify: (str) => slugify(str.replace(/<Badge[^>]*\/>/, "")),
