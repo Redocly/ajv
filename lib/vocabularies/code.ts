@@ -1,9 +1,8 @@
 import type {AnySchema, SchemaMap} from "../types"
 import type {SchemaCxt} from "../compile"
-import type KeywordCxt from "../compile/context"
+import type {KeywordCxt} from "../compile/validate"
 import {CodeGen, _, and, or, not, nil, strConcat, getProperty, Code, Name} from "../compile/codegen"
-import {alwaysValidSchema} from "../compile/util"
-import {Type} from "../compile/subschema"
+import {alwaysValidSchema, Type} from "../compile/util"
 import N from "../compile/names"
 
 export function checkReportMissingProp(cxt: KeywordCxt, prop: string): void {
@@ -114,7 +113,7 @@ export function validateArray(cxt: KeywordCxt): Name {
 
   function validateItems(notValid: () => void): void {
     const len = gen.const("len", _`${data}.length`)
-    gen.forRange("i", 0, len, (i) => {
+    gen.forRange("i", 0, len, (i: any) => {
       cxt.subschema(
         {
           keyword,
