@@ -7,10 +7,6 @@ describe("boolean schemas", () => {
   let ajvs: Ajv[]
 
   before(() => {
-    ajvs = [new Ajv(), new Ajv({allErrors: true}), new Ajv({inlineRefs: false})]
-  })
-
-  before(function() {
     ajvs = [
       new _Ajv({strictTuples: false}),
       new _Ajv({allErrors: true, strictTuples: false}),
