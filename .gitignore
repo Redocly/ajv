@@ -49,3 +49,4 @@ docs/license.md
 docs/.vuepress/components/Contributors/
 docs/packages/*
 !docs/packages/README.md
+.idea/
