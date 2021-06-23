@@ -86,11 +86,15 @@ export function callRef(cxt: KeywordCxt, v: Code, sch?: SchemaEnv, $async?: bool
   }
 
   function callSyncRef(): void {
-    cxt.result(
-      callValidateCode(cxt, v, passCxt),
-      () => addEvaluatedFrom(v),
-      () => addErrorsFrom(v)
-    )
+    gen.code(_`if (!visitedNodes.has(JSON.stringify(data))) { visitedNodes.add(JSON.stringify(data)); }`)
+    gen.if(_`!visitedNodes.has(JSON.stringify(data))`, () => (
+      cxt.result(
+        callValidateCode(cxt, v, passCxt),
+          () => addEvaluatedFrom(v),
+          () => addErrorsFrom(v)
+       )
+     )
+   )
   }
 
   function addErrorsFrom(source: Code): void {
