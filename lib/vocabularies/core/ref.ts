@@ -86,15 +86,16 @@ export function callRef(cxt: KeywordCxt, v: Code, sch?: SchemaEnv, $async?: bool
   }
 
   function callSyncRef(): void {
-    gen.code(_`if (!visitedNodes.has(JSON.stringify(data))) { visitedNodes.add(JSON.stringify(data)); }`)
-    gen.if(_`!visitedNodes.has(JSON.stringify(data))`, () => (
-      cxt.result(
+    gen.if(_`(!(visitedNodes.get(${v}) || new Set()).has(${cxt.data}))`, () => {
+      gen.code(_`if (!visitedNodes.has(${v})) { visitedNodes.set(${v}, (new Set()).add(${cxt.data})); } else {visitedNodes.get(${v}).add(${cxt.data})}`);
+      const res = cxt.result(
         callValidateCode(cxt, v, passCxt),
-          () => addEvaluatedFrom(v),
-          () => addErrorsFrom(v)
-       )
-     )
-   )
+        () => addEvaluatedFrom(v),
+        () => addErrorsFrom(v),
+      )
+      gen.code(_`const visitedSet = visitedNodes.get(${v}) || new Set(); visitedSet.delete(Array.from(visitedSet).pop())`)
+      return res;
+    });
   }
 
   function addErrorsFrom(source: Code): void {

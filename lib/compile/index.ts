@@ -165,8 +165,7 @@ export function compileSchema(this: Ajv, sch: SchemaEnv): SchemaEnv {
     gen.optimize(this.opts.code.optimize)
     // gen.optimize(1)
     const validateCode = gen.toString()
-
-    sourceCode = `const visitedNodes = new Set(); ${gen.scopeRefs(N.scope)}return ${validateCode}`
+    sourceCode = `const visitedNodes = new WeakMap(); ${gen.scopeRefs(N.scope)}return ${validateCode}`;
     // console.log((codeSize += sourceCode.length), (nodeCount += gen.nodeCount))
     if (this.opts.code.process) sourceCode = this.opts.code.process(sourceCode, sch)
     // console.log("\n\n\n *** \n", sourceCode)
