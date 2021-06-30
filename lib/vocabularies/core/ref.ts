@@ -97,7 +97,7 @@ export function callRef(cxt: KeywordCxt, v: Code, sch?: SchemaEnv, $async?: bool
         () => addEvaluatedFrom(v),
         () => addErrorsFrom(v),
       )
-      gen.code(_`${visitedNodes}.delete(dataNode)git`)
+      gen.code(_`${visitedNodes}.delete(dataNode)`)
       return res;
     });
   }
