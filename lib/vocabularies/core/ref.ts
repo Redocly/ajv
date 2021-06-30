@@ -90,7 +90,7 @@ export function callRef(cxt: KeywordCxt, v: Code, sch?: SchemaEnv, $async?: bool
     gen.if(_`!visitedNodes.has(${cxt.data})`, () => {
       gen.code(_`visitedNodesForRef.set(${v}, visitedNodes);`)
       gen.code(_`const dataNode = ${cxt.data};`)
-      gen.code(_`visitedNodes.set(dataNode);`)
+      gen.code(_`visitedNodes.add(dataNode);`)
       const res = cxt.result(
         callValidateCode(cxt, v, passCxt),
         () => addEvaluatedFrom(v),
