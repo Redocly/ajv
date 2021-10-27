@@ -26,10 +26,8 @@ const def: CodeKeywordDefinition = {
       schema,
       parentSchema,
       it,
-      it: {
-        opts: {loadSchemaSync},
-      },
     } = cxt
+    const { loadSchemaSync } = it.opts;
     const {oneOf} = parentSchema
     if (!it.opts.discriminator) {
       throw new Error("discriminator: requires discriminator option")
