@@ -20,7 +20,16 @@ const def: CodeKeywordDefinition = {
   schemaType: "object",
   error,
   code(cxt: KeywordCxt) {
-    const {gen, data, schema, parentSchema, it, it: { opts: { loadSchemaSync } }} = cxt
+    const {
+      gen,
+      data,
+      schema,
+      parentSchema,
+      it,
+      it: {
+        opts: {loadSchemaSync},
+      },
+    } = cxt
     const {oneOf} = parentSchema
     if (!it.opts.discriminator) {
       throw new Error("discriminator: requires discriminator option")
@@ -57,37 +66,48 @@ const def: CodeKeywordDefinition = {
     }
 
     function isRef(schema: object) {
-      return Object.keys(schema).includes('$ref');
+      return Object.keys(schema).includes("$ref")
     }
 
-    function findDiscriminatorTagName(schema: AnySchemaObject, tagName: string): AnySchemaObject | undefined {
-      const sch = isRef(schema) ? loadSchemaSync?.(it.baseId, schema['$ref'], schema.id || schema.$id || '') : schema;
+    function findDiscriminatorTagName(
+      schema: AnySchemaObject,
+      tagName: string
+    ): AnySchemaObject | undefined {
+      const sch = isRef(schema)
+        ? loadSchemaSync?.(it.baseId, schema["$ref"], schema.id || schema.$id || "")
+        : schema
       if (!sch) {
-        throw new Error(`Cannot resolve reference ${schema['$ref']}`);
+        throw new Error(`Cannot resolve reference ${schema["$ref"]}`)
       }
-      const schemaObject = sch as AnySchemaObject;
+      const schemaObject = sch as AnySchemaObject
       if (schemaObject.properties && schemaObject.properties[tagName]) {
-        return { id: schemaObject['$id'], schema: schemaObject.properties[tagName], required: schemaObject.required };
+        return {
+          id: schemaObject["$id"],
+          schema: schemaObject.properties[tagName],
+          required: schemaObject.required,
+        }
       }
 
       if (schemaObject.allOf) {
         for (let i = 0; i < schemaObject.allOf.length; i++) {
           const propSch = findDiscriminatorTagName(schemaObject.allOf[i], tagName)
           if (propSch) {
-            return propSch;
+            return propSch
           }
         }
       }
 
-      return;
+      return
     }
 
-    function transformOneOfMapping(oneOfMapping: Record<string, string | number | undefined>): Record<string, number> {
+    function transformOneOfMapping(
+      oneOfMapping: Record<string, string | number | undefined>
+    ): Record<string, number> {
       const newMapping: Record<string, number> = {}
-      Object.keys(oneOfMapping).forEach(function(key, idx) {
+      Object.keys(oneOfMapping).forEach(function (key, idx) {
         newMapping[key] = idx
       })
-      return newMapping;
+      return newMapping
     }
 
     function getMapping(): {[T in string]?: number} {
@@ -95,13 +115,13 @@ const def: CodeKeywordDefinition = {
       const topRequired = hasRequired(parentSchema)
       let tagRequired = true
       for (let i = 0; i < oneOf.length; i++) {
-        const sch = oneOf[i];
-        const propSch = findDiscriminatorTagName(sch, tagName);
+        const sch = oneOf[i]
+        const propSch = findDiscriminatorTagName(sch, tagName)
         if (typeof propSch != "object") {
           throw new Error(`discriminator: oneOf schemas must have "properties/${tagName}"`)
         }
         tagRequired = tagRequired && (topRequired || hasRequired(propSch))
-        propSch.id && addMappings(propSch.schema, propSch.id || i);
+        propSch.id && addMappings(propSch.schema, propSch.id || i)
       }
       if (!tagRequired) throw new Error(`discriminator: "${tagName}" must be required`)
       return transformOneOfMapping(oneOfMapping)
@@ -123,7 +143,10 @@ const def: CodeKeywordDefinition = {
       }
 
       function addMapping(tagValue: unknown, i: number | string): void {
-        if (typeof tagValue != "string" || (tagValue in oneOfMapping && oneOfMapping[tagValue] !== i)) {
+        if (
+          typeof tagValue != "string" ||
+          (tagValue in oneOfMapping && oneOfMapping[tagValue] !== i)
+        ) {
           throw new Error(`discriminator: "${tagName}" values must be unique strings`)
         }
         oneOfMapping[tagValue] = i
