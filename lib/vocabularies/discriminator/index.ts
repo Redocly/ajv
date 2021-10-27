@@ -61,7 +61,11 @@ const def: CodeKeywordDefinition = {
     }
 
     function findDiscriminatorTagName(schema: AnySchemaObject, tagName: string): AnySchemaObject | undefined {
-      const schemaObject = isRef(schema) ? loadSchemaSync?(it.baseId, schema['$ref']) : schema;
+      const sch = isRef(schema) ? loadSchemaSync?.(it.baseId, schema['$ref'], '') : schema;
+      if (!sch) {
+        throw new Error(`Cannot resolve reference ${schema['$ref']}`);
+      }
+      const schemaObject = sch as AnySchemaObject;
       if (schemaObject.properties && schemaObject.properties[tagName]) {
         return { id: schemaObject['$id'], schema: schemaObject.properties[tagName], required: schemaObject.required };
       }
