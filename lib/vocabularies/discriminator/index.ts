@@ -20,14 +20,13 @@ const def: CodeKeywordDefinition = {
   schemaType: "object",
   error,
   code(cxt: KeywordCxt) {
-    const {gen, data, schema, parentSchema, it} = cxt
+    const {gen, data, schema, parentSchema, it, it: { opts: { loadSchemaSync } }} = cxt
     const {oneOf} = parentSchema
     if (!it.opts.discriminator) {
       throw new Error("discriminator: requires discriminator option")
     }
     const tagName = schema.propertyName
     if (typeof tagName != "string") throw new Error("discriminator: requires propertyName")
-    if (schema.mapping) throw new Error("discriminator: mapping is not supported")
     if (!oneOf) throw new Error("discriminator: requires oneOf keyword")
     const valid = gen.let("valid", false)
     const tag = gen.const("tag", _`${data}${getProperty(tagName)}`)
@@ -57,27 +56,57 @@ const def: CodeKeywordDefinition = {
       return _valid
     }
 
+    function isRef(schema: object) {
+      return Object.keys(schema).includes('$ref');
+    }
+
+    function findDiscriminatorTagName(schema: AnySchemaObject, tagName: string): AnySchemaObject | undefined {
+      const schemaObject = isRef(schema) ? loadSchemaSync?(it.baseId, schema['$ref']) : schema;
+      if (schemaObject.properties && schemaObject.properties[tagName]) {
+        return { id: schemaObject['$id'], schema: schemaObject.properties[tagName], required: schemaObject.required };
+      }
+
+      if (schemaObject.allOf) {
+        for (let i = 0; i < schemaObject.allOf.length; i++) {
+          const propSch = findDiscriminatorTagName(schemaObject.allOf[i], tagName)
+          if (propSch) {
+            return propSch;
+          }
+        }
+      }
+
+      return;
+    }
+
+    function transformOneOfMapping(oneOfMapping: Record<string, string | number | undefined>): Record<string, number> {
+      const newMapping: Record<string, number> = {}
+      Object.keys(oneOfMapping).forEach(function(key, idx) {
+        newMapping[key] = idx
+      })
+      return newMapping;
+    }
+
     function getMapping(): {[T in string]?: number} {
-      const oneOfMapping: {[T in string]?: number} = {}
+      const oneOfMapping: {[T in string]?: number | string} = {}
       const topRequired = hasRequired(parentSchema)
       let tagRequired = true
       for (let i = 0; i < oneOf.length; i++) {
-        const sch = oneOf[i]
-        const propSch = sch.properties?.[tagName]
+        const sch = oneOf[i];
+        const propSch = findDiscriminatorTagName(sch, tagName);
         if (typeof propSch != "object") {
           throw new Error(`discriminator: oneOf schemas must have "properties/${tagName}"`)
         }
-        tagRequired = tagRequired && (topRequired || hasRequired(sch))
-        addMappings(propSch, i)
+        tagRequired = tagRequired && (topRequired || hasRequired(propSch))
+        propSch.id && addMappings(propSch.schema, propSch.id || i);
       }
       if (!tagRequired) throw new Error(`discriminator: "${tagName}" must be required`)
-      return oneOfMapping
+      return transformOneOfMapping(oneOfMapping)
 
       function hasRequired({required}: AnySchemaObject): boolean {
         return Array.isArray(required) && required.includes(tagName)
       }
 
-      function addMappings(sch: AnySchemaObject, i: number): void {
+      function addMappings(sch: AnySchemaObject, i: number | string): void {
         if (sch.const) {
           addMapping(sch.const, i)
         } else if (sch.enum) {
@@ -89,8 +118,8 @@ const def: CodeKeywordDefinition = {
         }
       }
 
-      function addMapping(tagValue: unknown, i: number): void {
-        if (typeof tagValue != "string" || tagValue in oneOfMapping) {
+      function addMapping(tagValue: unknown, i: number | string): void {
+        if (typeof tagValue != "string" || (tagValue in oneOfMapping && oneOfMapping[tagValue] !== i)) {
           throw new Error(`discriminator: "${tagName}" values must be unique strings`)
         }
         oneOfMapping[tagValue] = i
