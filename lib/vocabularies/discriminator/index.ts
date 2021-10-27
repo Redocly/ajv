@@ -66,7 +66,7 @@ const def: CodeKeywordDefinition = {
     }
 
     function isRef(schema: object) {
-      return Object.keys(schema).includes("$ref")
+      return schema.hasOwnProperty("$ref")
     }
 
     function findDiscriminatorTagName(
