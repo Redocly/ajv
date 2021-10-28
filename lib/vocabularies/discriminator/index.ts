@@ -20,14 +20,8 @@ const def: CodeKeywordDefinition = {
   schemaType: "object",
   error,
   code(cxt: KeywordCxt) {
-    const {
-      gen,
-      data,
-      schema,
-      parentSchema,
-      it,
-    } = cxt
-    const { loadSchemaSync } = it.opts;
+    const {gen, data, schema, parentSchema, it} = cxt
+    const {loadSchemaSync} = it.opts
     const {oneOf} = parentSchema
     if (!it.opts.discriminator) {
       throw new Error("discriminator: requires discriminator option")
@@ -80,9 +74,8 @@ const def: CodeKeywordDefinition = {
       const schemaObject = sch as AnySchemaObject
       if (schemaObject.properties && schemaObject.properties[tagName]) {
         return {
-          id: schemaObject["$id"],
-          schema: schemaObject.properties[tagName],
-          required: schemaObject.required,
+          schema: schemaObject,
+          propSchema: schemaObject.properties[tagName],
         }
       }
 
@@ -113,13 +106,13 @@ const def: CodeKeywordDefinition = {
       const topRequired = hasRequired(parentSchema)
       let tagRequired = true
       for (let i = 0; i < oneOf.length; i++) {
-        const sch = oneOf[i]
-        const propSch = findDiscriminatorTagName(sch, tagName)
-        if (typeof propSch != "object") {
+        const findDiscriminatorTagResult = findDiscriminatorTagName(oneOf[i], tagName)
+        if (typeof findDiscriminatorTagResult != "object") {
           throw new Error(`discriminator: oneOf schemas must have "properties/${tagName}"`)
         }
-        tagRequired = tagRequired && (topRequired || hasRequired(propSch))
-        propSch.id && addMappings(propSch.schema, propSch.id || i)
+        const {schema, propSchema} = findDiscriminatorTagResult
+        tagRequired = tagRequired && (topRequired || hasRequired(schema))
+        schema["$id"] && addMappings(propSchema, schema["$id"] || i)
       }
       if (!tagRequired) throw new Error(`discriminator: "${tagName}" must be required`)
       return transformOneOfMapping(oneOfMapping)
