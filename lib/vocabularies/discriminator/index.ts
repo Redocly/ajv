@@ -27,7 +27,6 @@ const def: CodeKeywordDefinition = {
     }
     const tagName = schema.propertyName
     if (typeof tagName != "string") throw new Error("discriminator: requires propertyName")
-    if (schema.mapping) throw new Error("discriminator: mapping is not supported")
     if (!oneOf) throw new Error("discriminator: requires oneOf keyword")
     const valid = gen.let("valid", false)
     const tag = gen.const("tag", _`${data}${getProperty(tagName)}`)
@@ -57,13 +56,39 @@ const def: CodeKeywordDefinition = {
       return _valid
     }
 
+    function isRef(schema: AnySchemaObject) {
+      return schema.hasOwnProperty('$ref');
+    }
+
     function getMapping(): {[T in string]?: number} {
       const oneOfMapping: {[T in string]?: number} = {}
       const topRequired = hasRequired(parentSchema)
       let tagRequired = true
       for (let i = 0; i < oneOf.length; i++) {
         const sch = oneOf[i]
-        const propSch = sch.properties?.[tagName]
+        let propSch;
+        if (isRef(sch)) {
+          // compare the ref pointer to the one in mapping
+          if (schema.mapping) {
+            const { mapping } = schema
+            let matchedKey;
+            Object.keys(mapping).forEach(function(key) {
+              if (mapping[key] === sch['$ref']) {
+                matchedKey = key;
+              }
+            })
+
+            if (matchedKey) {
+              addMapping(matchedKey, i);
+            } else {
+              throw new Error(`${sch['$ref']} should have corresponding entry in mapping`)
+            }
+          }
+          continue;
+        } else {
+          // find if raw schema contains tagName
+          propSch = sch.properties?.[tagName]
+        }
         if (typeof propSch != "object") {
           throw new Error(`discriminator: oneOf schemas must have "properties/${tagName}"`)
         }
