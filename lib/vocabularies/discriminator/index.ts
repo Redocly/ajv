@@ -69,12 +69,21 @@ const def: CodeKeywordDefinition = {
         let propSch;
         if (isRef(sch)) {
           // compare the ref pointer to the one in mapping
-          const { mapping } = schema
-          Object.keys(mapping).forEach(function(key) {
-            if (mapping[key] === sch['$ref']) {
-              addMapping(key, i);
+          if (schema.mapping) {
+            const { mapping } = schema
+            let matchedKey;
+            Object.keys(mapping).forEach(function(key) {
+              if (mapping[key] === sch['$ref']) {
+                matchedKey = key;
+              }
+            })
+
+            if (matchedKey) {
+              addMapping(matchedKey, i);
+            } else {
+              throw new Error(`${sch['$ref']} should have corresponding entry in mapping`)
             }
-          })
+          }
           continue;
         } else {
           // find if raw schema contains tagName
