@@ -13,6 +13,7 @@ import {shouldUseGroup, shouldUseRule} from "./applicability"
 import {checkDataType, checkDataTypes, reportTypeError, DataType} from "./dataType"
 import {assignDefaults} from "./defaults"
 import {funcKeywordCode, macroKeywordCode, validateKeywordUsage, validSchemaType} from "./keyword"
+import apDef from "../../vocabularies/unevaluated/unevaluatedProperties";
 import {getSubschema, extendSubschemaData, SubschemaArgs, extendSubschemaMode} from "./subschema"
 import {_, nil, str, or, not, getProperty, Block, Code, Name, CodeGen} from "../codegen"
 import N from "../names"
@@ -223,13 +224,16 @@ function schemaKeywords(
   errsCount?: Name
 ): void {
   const {gen, schema, data, allErrors, opts, self} = it
+ 
   const {RULES} = self
+  
   if (schema.$ref && (opts.ignoreKeywordsWithRef || !schemaHasRulesButRef(schema, RULES))) {
     gen.block(() => keywordCode(it, "$ref", (RULES.all.$ref as Rule).definition)) // TODO typecast
     return
   }
   if (!opts.jtd) checkStrictTypes(it, types)
   gen.block(() => {
+    
     for (const group of RULES.rules) groupKeywords(group)
     groupKeywords(RULES.post)
   })
@@ -260,10 +264,22 @@ function iterateKeywords(it: SchemaObjCxt, group: RuleGroup): void {
   } = it
   if (useDefaults) assignDefaults(it, group.type)
   gen.block(() => {
+    
     for (const rule of group.rules) {
+      
       if (shouldUseRule(schema, rule)) {
+  
         keywordCode(it, rule.keyword, rule.definition, group.type)
       }
+      if(rule.keyword === 'properties' ){
+
+        if(it.opts.defaultAdditionalProperties === false && !/allOf\/[0-9]+$/g.test(it.errSchemaPath)) {
+          keywordCode(it, "unevaluatedProperties", apDef, group.type)
+        }
+      }
+    }
+    if (it.opts.defaultAdditionalProperties === false && schema?.properties === undefined && schema?.allOf !== undefined) {
+      keywordCode(it, "unevaluatedProperties", apDef, group.type)
     }
   })
 }

@@ -3,6 +3,7 @@ import type {
   KeywordErrorDefinition,
   ErrorObject,
   AnySchema,
+  AddedKeywordDefinition,
 } from "../../types"
 import {_, not, and, Name, Code} from "../../compile/codegen"
 import {alwaysValidSchema, Type} from "../../compile/util"
@@ -19,14 +20,17 @@ const error: KeywordErrorDefinition = {
   params: ({params}) => _`{unevaluatedProperty: ${params.unevaluatedProperty}}`,
 }
 
-const def: CodeKeywordDefinition = {
+const def: CodeKeywordDefinition & AddedKeywordDefinition = {
   keyword: "unevaluatedProperties",
-  type: "object",
+  type: ["object"],
   schemaType: ["boolean", "object"],
+  allowUndefined: true,
   trackErrors: true,
   error,
   code(cxt) {
-    const {gen, schema, data, errsCount, it} = cxt
+    const {gen, data, errsCount, it} = cxt
+   
+    const {schema = it.opts.defaultAdditionalProperties} = cxt;
     /* istanbul ignore if */
     if (!errsCount) throw new Error("ajv implementation error")
     const {allErrors, props} = it
@@ -43,6 +47,7 @@ const def: CodeKeywordDefinition = {
           : gen.if(unevaluatedStatic(props, key), () => unevaluatedPropCode(key))
       )
     }
+    
     it.props = true
     cxt.ok(_`${errsCount} === ${N.errors}`)
 
