@@ -264,21 +264,25 @@ function iterateKeywords(it: SchemaObjCxt, group: RuleGroup): void {
   } = it
   if (useDefaults) assignDefaults(it, group.type)
   gen.block(() => {
-    
     for (const rule of group.rules) {
       
       if (shouldUseRule(schema, rule)) {
-  
+        
+
         keywordCode(it, rule.keyword, rule.definition, group.type)
       }
-      if(rule.keyword === 'properties' ){
 
+      if(rule.keyword === 'properties' ){
         if(it.opts.defaultAdditionalProperties === false && !/allOf\/[0-9]+$/g.test(it.errSchemaPath)) {
-          keywordCode(it, "unevaluatedProperties", apDef, group.type)
-        }
+        
+         keywordCode(it, "unevaluatedProperties", apDef, group.type)
+    
       }
     }
-    if (it.opts.defaultAdditionalProperties === false && schema?.properties === undefined && schema?.allOf !== undefined) {
+  }
+    
+    if (it.opts.defaultAdditionalProperties === false && schema?.properties === undefined && schema?.allOf !== undefined) { 
+      
       keywordCode(it, "unevaluatedProperties", apDef, group.type)
     }
   })

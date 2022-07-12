@@ -28,9 +28,18 @@ const def: CodeKeywordDefinition & AddedKeywordDefinition = {
   trackErrors: true,
   error,
   code(cxt) {
-    const {gen, data, errsCount, it} = cxt
+    const {gen, data, errsCount, it} = cxt   
+    const {schema = it.opts.defaultAdditionalProperties} = cxt
+    // @ts-ignore 
+    const rootSchema = it.schemaEnv.root.schema?.allOf || [] as [any];
    
-    const {schema = it.opts.defaultAdditionalProperties} = cxt;
+   
+ 
+    if(rootSchema.find((item: any) => item?.['$ref'] === it.errSchemaPath)) {
+       // @ts-ignore 
+      return;
+    }
+
     /* istanbul ignore if */
     if (!errsCount) throw new Error("ajv implementation error")
     const {allErrors, props} = it

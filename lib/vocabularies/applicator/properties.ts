@@ -9,6 +9,8 @@ const def: CodeKeywordDefinition = {
   type: "object",
   schemaType: "object",
   code(cxt: KeywordCxt) {
+   
+
     const {gen, schema, parentSchema, data, it} = cxt
     if (it.opts.removeAdditional === "all" && parentSchema.additionalProperties === undefined) {
       apDef.code(new KeywordCxt(it, apDef, "additionalProperties"))
@@ -17,7 +19,9 @@ const def: CodeKeywordDefinition = {
     for (const prop of allProps) {
       it.definedProperties.add(prop)
     }
+  
     if (it.opts.unevaluated && allProps.length && it.props !== true) {
+      
       it.props = mergeEvaluated.props(gen, toHash(allProps), it.props)
     }
     const properties = allProps.filter((p) => !alwaysValidSchema(it, schema[p]))

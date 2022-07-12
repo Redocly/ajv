@@ -7,6 +7,7 @@ import N from "../../compile/names"
 import {SchemaEnv, resolveRef} from "../../compile"
 import {mergeEvaluated} from "../../compile/util"
 
+
 const def: CodeKeywordDefinition = {
   keyword: "$ref",
   schemaType: "string",
