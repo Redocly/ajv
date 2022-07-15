@@ -22,19 +22,22 @@ const def: CodeKeywordDefinition = {
   code(cxt: KeywordCxt) {
     const {gen, data, schema, parentSchema, it} = cxt
 
-    const keyword = parentSchema.hasOwnProperty('oneOf')
-      ? 'oneOf'
-      : parentSchema.hasOwnProperty('anyOf')
-      ? 'anyOf'
-      : undefined;
+    const keyword = parentSchema.hasOwnProperty("oneOf")
+      ? "oneOf"
+      : parentSchema.hasOwnProperty("anyOf")
+      ? "anyOf"
+      : undefined
 
     if (!it.opts.discriminator) {
       throw new Error("discriminator: requires discriminator option")
     }
     const tagName = schema.propertyName
     if (typeof tagName != "string") throw new Error("discriminator: requires propertyName")
-    if (!keyword) throw new Error("discriminator: is legal only when using one of the composite keywords oneOf, anyOf");
-    const parentSchemaVariants = parentSchema[keyword];
+    if (!keyword)
+      throw new Error(
+        "discriminator: is legal only when using one of the composite keywords oneOf, anyOf"
+      )
+    const parentSchemaVariants = parentSchema[keyword]
     const valid = gen.let("valid", false)
     const tag = gen.const("tag", _`${data}${getProperty(tagName)}`)
     gen.if(
@@ -64,7 +67,7 @@ const def: CodeKeywordDefinition = {
     }
 
     function isRef(schema: AnySchemaObject) {
-      return schema.hasOwnProperty('$ref');
+      return schema.hasOwnProperty("$ref")
     }
 
     function getMapping(): {[T in string]?: number} {
@@ -73,25 +76,25 @@ const def: CodeKeywordDefinition = {
       let tagRequired = true
       for (let i = 0; i < parentSchemaVariants.length; i++) {
         const sch = parentSchemaVariants[i]
-        let propSch;
+        let propSch
         if (isRef(sch)) {
           // compare the ref pointer to the one in mapping
           if (schema.mapping) {
-            const { mapping } = schema
-            let matchedKey;
-            Object.keys(mapping).forEach(function(key) {
-              if (mapping[key] === sch['$ref']) {
-                matchedKey = key;
+            const {mapping} = schema
+            let matchedKey
+            Object.keys(mapping).forEach(function (key) {
+              if (mapping[key] === sch["$ref"]) {
+                matchedKey = key
               }
             })
 
             if (matchedKey) {
-              addMapping(matchedKey, i);
+              addMapping(matchedKey, i)
             } else {
-              throw new Error(`${sch['$ref']} should have corresponding entry in mapping`)
+              throw new Error(`${sch["$ref"]} should have corresponding entry in mapping`)
             }
           }
-          continue;
+          continue
         } else {
           // find if raw schema contains tagName
           propSch = sch.properties?.[tagName]
