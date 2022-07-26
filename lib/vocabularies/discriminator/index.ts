@@ -35,7 +35,7 @@ const def: CodeKeywordDefinition = {
     if (typeof tagName != "string") throw new Error("discriminator: requires propertyName")
     if (!keyword)
       throw new Error(
-        "discriminator: is legal only when using one of the composite keywords oneOf, anyOf"
+        "discriminator: requires the oneOf or anyOf composite keyword"
       )
     const parentSchemaVariants = parentSchema[keyword]
     const valid = gen.let("valid", false)
