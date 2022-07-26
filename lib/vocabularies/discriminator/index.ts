@@ -91,7 +91,7 @@ const def: CodeKeywordDefinition = {
             if (matchedKey) {
               addMapping(matchedKey, i)
             } else {
-              throw new Error(`${sch["$ref"]} should have corresponding entry in mapping`)
+              throw new Error(`${sch["$ref"]} should have a corresponding entry in mapping`)
             }
           }
           continue
