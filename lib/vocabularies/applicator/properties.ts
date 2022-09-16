@@ -10,10 +10,7 @@ const def: CodeKeywordDefinition = {
   schemaType: "object",
   code(cxt: KeywordCxt) {
     const {gen, schema, parentSchema, data, it} = cxt
-    if (
-      (it.opts.removeAdditional === "all" && parentSchema.additionalProperties === undefined) ||
-      it.opts.defaultAdditionalProperties === false
-    ) {
+    if (it.opts.removeAdditional === "all" && parentSchema.additionalProperties === undefined) {
       apDef.code(new KeywordCxt(it, apDef, "additionalProperties"))
     }
     const allProps = allSchemaProperties(schema)

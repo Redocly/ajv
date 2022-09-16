@@ -118,7 +118,8 @@ export interface CurrentOptions {
   loadSchemaSync?: (base: string, $ref: string, id: string) => AnySchemaObject | boolean
   // options to modify validated data:
   removeAdditional?: boolean | "all" | "failing"
-  defaultAdditionalProperties?: boolean
+  defaultUnevaluatedProperties?: boolean
+  defaultAdditionalProperties?: boolean // @deprecated
 
   useDefaults?: boolean | "empty"
   coerceTypes?: boolean | "array"
@@ -295,6 +296,10 @@ export default class Ajv {
 
   constructor(opts: Options = {}) {
     opts = this.opts = {...opts, ...requiredOptions(opts)}
+    if (opts.unevaluated && opts.defaultAdditionalProperties === false) {
+      // deprecated option, replaced now to a better alternative
+      this.opts.defaultUnevaluatedProperties = false
+    }
     const {es5, lines} = this.opts.code
 
     this.scope = new ValueScope({scope: {}, prefixes: EXT_SCOPE_NAMES, es5, lines})
