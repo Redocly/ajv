@@ -2,7 +2,6 @@ import type Ajv from "../dist/ajv"
 import type AjvPack from "../dist/standalone/instance"
 import type AjvCore from "../dist/core"
 import type {SchemaObject} from "../dist/ajv"
-import _Ajv from "./ajv"
 import _Ajv2020 from "./ajv2020"
 import getAjvInstances from "./ajv_instances"
 import {withStandalone} from "./ajv_standalone"
@@ -15,14 +14,13 @@ describe("defaultUnevaluatedProperties=false option", function () {
   this.timeout(10000)
 
   before(() => {
-    ajvs = [...getAjvs(_Ajv), ...getAjvs(_Ajv2020)]
+    ajvs = [...getAjvs(_Ajv2020)]
   })
 
   function getAjvs(AjvClass: typeof AjvCore) {
     return withStandalone(
       getAjvInstances(AjvClass, options, {
         defaultUnevaluatedProperties: false,
-        defaultAdditionalProperties: false, // force unevaluated for draft07 ajv
       })
     )
   }

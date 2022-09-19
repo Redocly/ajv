@@ -302,11 +302,6 @@ export default class Ajv {
 
   constructor(opts: Options = {}) {
     opts = this.opts = {...opts, ...requiredOptions(opts)}
-    if (opts.defaultAdditionalProperties === false) {
-      // deprecated option, replaced now to a better alternative
-      this.opts.defaultUnevaluatedProperties = false
-      this.opts.unevaluated = true
-    }
     const {es5, lines} = this.opts.code
 
     this.scope = new ValueScope({scope: {}, prefixes: EXT_SCOPE_NAMES, es5, lines})
