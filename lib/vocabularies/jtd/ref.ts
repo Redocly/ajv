@@ -59,8 +59,7 @@ const def: CodeKeywordDefinition = {
           topSchemaRef: schName,
           errSchemaPath: `/definitions/${ref}`,
         },
-        valid,
-        it.isAllOfVariant // pass isAllOfVariant into $ref
+        valid
       )
     }
   },

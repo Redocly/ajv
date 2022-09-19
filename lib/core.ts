@@ -68,7 +68,13 @@ import DefaultUriResolver from "./runtime/uri"
 const defaultRegExp: RegExpEngine = (str, flags) => new RegExp(str, flags)
 defaultRegExp.code = "new RegExp"
 
-const META_IGNORE_OPTIONS: (keyof Options)[] = ["removeAdditional", "useDefaults", "coerceTypes"]
+const META_IGNORE_OPTIONS: (keyof Options)[] = [
+  "removeAdditional",
+  "useDefaults",
+  "coerceTypes",
+  "defaultUnevaluatedProperties",
+  "defaultAdditionalProperties",
+]
 const EXT_SCOPE_NAMES = new Set([
   "validate",
   "serialize",
@@ -296,9 +302,10 @@ export default class Ajv {
 
   constructor(opts: Options = {}) {
     opts = this.opts = {...opts, ...requiredOptions(opts)}
-    if (opts.unevaluated && opts.defaultAdditionalProperties === false) {
+    if (opts.defaultAdditionalProperties === false) {
       // deprecated option, replaced now to a better alternative
       this.opts.defaultUnevaluatedProperties = false
+      this.opts.unevaluated = true
     }
     const {es5, lines} = this.opts.code
 
