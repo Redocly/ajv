@@ -78,7 +78,7 @@ const defaultOptions = {
 
 <sup>\*</sup> only with JSON Schema
 
-<sup>\**</sup> only with JSON Type Definition
+<sup>\*\*</sup> only with JSON Type Definition
 
 ## Strict mode options <Badge text="v7" />
 
@@ -344,7 +344,7 @@ Include human-readable messages in errors. `true` by default. `false` can be pas
 
 ### uriResolver
 
-By default `uriResolver` is undefined and relies on the embedded uriResolver [uri-js-replace](https://github.com/andreinwald/uri-js-replace). Pass an object that satisfies the interface [UriResolver](https://github.com/ajv-validator/ajv/blob/master/lib/types/index.ts) to be used in replacement. One alternative is [fast-uri](https://github.com/fastify/fast-uri).
+By default `uriResolver` is undefined and relies on the embedded uriResolver [fast-uri](https://github.com/fastify/fast-uri). Pass an object that satisfies the interface [UriResolver](https://github.com/ajv-validator/ajv/blob/master/lib/types/index.ts) to be used in replacement. One alternative is [uri-js](https://github.com/garycourt/uri-js).
 
 ### code <Badge text="v7" />
 
@@ -353,8 +353,8 @@ Code generation options:
 ```typescript
 type CodeOptions = {
   es5?: boolean // to generate es5 code - by default code is es6, with "for-of" loops, "let" and "const"
-  esm?: boolean // how functions should be exported - by default CJS is used, so the validate function(s) 
-  // file can be `required`. Set this value to true to export the validate function(s) as ES Modules, enabling 
+  esm?: boolean // how functions should be exported - by default CJS is used, so the validate function(s)
+  // file can be `required`. Set this value to true to export the validate function(s) as ES Modules, enabling
   // bunlers to do their job.
   lines?: boolean // add line-breaks to code - to simplify debugging of generated functions
   source?: boolean // add `source` property (see Source below) to validating function.
@@ -373,7 +373,7 @@ type CodeOptions = {
   // _`require("./my-formats")`
   regExp: RegExpEngine
   // Pass non-standard RegExp engine to mitigate ReDoS, e.g. node-re2.
-  // During validation of a schema, code.regExp will be 
+  // During validation of a schema, code.regExp will be
   // used to match strings against regular expressions.
   // The supplied function must support the interface:
   // regExp(regex, unicodeFlag).test(string) => boolean
