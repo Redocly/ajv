@@ -15,6 +15,8 @@ uriResolvers.forEach((resolver) => {
     describeTitle = "uri-js resolver"
   } else {
     describeTitle = "fast-uri resolver"
+  } else {
+    describeTitle = "uri-js-replace resolver"
   }
   describe(describeTitle, () => {
     describe("resolve", () => {
