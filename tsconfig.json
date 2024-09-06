@@ -3,7 +3,7 @@
   "include": ["lib"],
   "compilerOptions": {
     "outDir": "dist",
-    "lib": ["ESNext"],
+    "lib": ["ES2018", "DOM"],
     "types": ["node"],
     "allowJs": true,
     "target": "ES2018",
