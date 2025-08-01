@@ -528,7 +528,10 @@ describe("discriminator keyword", function () {
         ],
       }
 
-      invalidSchema(schema, /discriminator: oneOf subschemas \(or referenced schemas\) must have "properties\/type" or match mapping/)
+      invalidSchema(
+        schema,
+        /discriminator: oneOf subschemas \(or referenced schemas\) must have "properties\/type" or match mapping/
+      )
     })
 
     it("should handle mixed allOf and direct properties", () => {

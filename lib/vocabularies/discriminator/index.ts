@@ -16,7 +16,10 @@ const error: KeywordErrorDefinition = {
     _`{error: ${discrError}, tag: ${tagName}, tagValue: ${tag}}`,
 }
 
-function getDiscriminatorPropertyFromAllOf(sch: AnySchemaObject, tagName: string): AnySchemaObject | undefined {
+function getDiscriminatorPropertyFromAllOf(
+  sch: AnySchemaObject,
+  tagName: string
+): AnySchemaObject | undefined {
   if (!sch.allOf || !Array.isArray(sch.allOf)) {
     return undefined
   }
@@ -100,7 +103,7 @@ const def: CodeKeywordDefinition = {
           if (sch instanceof SchemaEnv) sch = sch.schema
         }
 
-        let propSch = sch?.properties?.[tagName];
+        let propSch = sch?.properties?.[tagName]
         if (!propSch && sch?.allOf) {
           propSch = getDiscriminatorPropertyFromAllOf(sch, tagName)
         }
