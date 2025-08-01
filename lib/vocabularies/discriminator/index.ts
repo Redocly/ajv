@@ -16,6 +16,20 @@ const error: KeywordErrorDefinition = {
     _`{error: ${discrError}, tag: ${tagName}, tagValue: ${tag}}`,
 }
 
+function getDiscriminatorPropertyFromAllOf(sch: AnySchemaObject, tagName: string): AnySchemaObject | undefined {
+  if (!sch.allOf || !Array.isArray(sch.allOf)) {
+    return undefined
+  }
+
+  for (const subschema of sch.allOf) {
+    if (subschema?.properties?.[tagName]) {
+      return subschema.properties[tagName] as AnySchemaObject
+    }
+  }
+
+  return undefined
+}
+
 const def: CodeKeywordDefinition = {
   keyword: "discriminator",
   type: "object",
@@ -85,7 +99,11 @@ const def: CodeKeywordDefinition = {
           sch = resolveRef.call(it.self, it.schemaEnv.root, it.baseId, schRef)
           if (sch instanceof SchemaEnv) sch = sch.schema
         }
-        const propSch = sch?.properties?.[tagName]
+
+        let propSch = sch?.properties?.[tagName];
+        if (!propSch && sch?.allOf) {
+          propSch = getDiscriminatorPropertyFromAllOf(sch, tagName)
+        }
 
         if (typeof propSch != "object") {
           throw new Error(
@@ -98,8 +116,21 @@ const def: CodeKeywordDefinition = {
       if (!tagRequired) throw new Error(`discriminator: "${tagName}" must be required`)
       return discriminatorMapping
 
-      function hasRequired({required}: AnySchemaObject): boolean {
-        return Array.isArray(required) && required.includes(tagName)
+      function hasRequired(sch: AnySchemaObject): boolean {
+        if (Array.isArray(sch.required) && sch.required.includes(tagName)) {
+          return true
+        }
+
+        if (sch.allOf && Array.isArray(sch.allOf)) {
+          for (const subschema of sch.allOf) {
+            const subSch = subschema as AnySchemaObject
+            if (Array.isArray(subSch.required) && subSch.required.includes(tagName)) {
+              return true
+            }
+          }
+        }
+
+        return false
       }
 
       function addMappings(sch: AnySchemaObject, i: number): void {
