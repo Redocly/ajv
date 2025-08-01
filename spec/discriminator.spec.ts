@@ -463,6 +463,172 @@ describe("discriminator keyword", function () {
     })
   })
 
+  describe("discriminator with allOf support", () => {
+    it("should validate discriminator property from allOf subschemas", () => {
+      const schema = {
+        type: "object",
+        discriminator: {propertyName: "type"},
+        oneOf: [
+          {
+            allOf: [
+              {
+                properties: {
+                  type: {const: "user"},
+                  name: {type: "string"},
+                },
+                required: ["type", "name"],
+              },
+              {
+                properties: {
+                  age: {type: "number"},
+                },
+              },
+            ],
+          },
+          {
+            allOf: [
+              {
+                properties: {
+                  type: {const: "admin"},
+                  id: {type: "string"},
+                },
+                required: ["type", "id"],
+              },
+              {
+                properties: {
+                  permissions: {type: "array"},
+                },
+              },
+            ],
+          },
+        ],
+      }
+
+      assertValid([schema], {type: "user", name: "John", age: 30})
+      assertValid([schema], {type: "admin", id: "admin123", permissions: ["read", "write"]})
+
+      assertInvalid([schema], {type: "guest", name: "John"})
+      assertInvalid([schema], {type: "user", id: "user123"})
+      assertInvalid([schema], {type: "admin", name: "Admin"})
+    })
+
+    it("should handle required property from allOf subschemas", () => {
+      const schema = {
+        type: "object",
+        discriminator: {propertyName: "role"},
+        oneOf: [
+          {
+            allOf: [
+              {
+                properties: {
+                  role: {const: "employee"},
+                  employeeId: {type: "string"},
+                },
+                required: ["role", "employeeId"],
+              },
+              {
+                properties: {
+                  department: {type: "string"},
+                },
+              },
+            ],
+          },
+          {
+            allOf: [
+              {
+                properties: {
+                  role: {const: "manager"},
+                },
+                required: ["role"],
+              },
+              {
+                properties: {
+                  teamSize: {type: "number"},
+                },
+                required: ["role"],
+              },
+            ],
+          },
+        ],
+      }
+
+      assertValid([schema], {role: "employee", employeeId: "EMP001", department: "Engineering"})
+      assertValid([schema], {role: "manager", teamSize: 5})
+
+      assertInvalid([schema], {employeeId: "EMP001", department: "Engineering"})
+      assertInvalid([schema], {teamSize: 5})
+    })
+
+    it("should handle discriminator property not found in allOf", () => {
+      const schema = {
+        type: "object",
+        discriminator: {propertyName: "type"},
+        oneOf: [
+          {
+            allOf: [
+              {
+                properties: {
+                  name: {type: "string"},
+                },
+                required: ["name"],
+              },
+              {
+                properties: {
+                  age: {type: "number"},
+                },
+              },
+            ],
+          },
+          {
+            properties: {
+              type: {const: "simple"},
+              value: {type: "string"},
+            },
+            required: ["type", "value"],
+          },
+        ],
+      }
+
+      invalidSchema(
+        schema,
+        /discriminator: oneOf subschemas \(or referenced schemas\) must have "properties\/type" or match mapping/
+      )
+    })
+
+    it("should handle mixed allOf and direct properties", () => {
+      const schema = {
+        type: "object",
+        discriminator: {propertyName: "kind"},
+        oneOf: [
+          {
+            allOf: [
+              {
+                properties: {
+                  kind: {const: "complex"},
+                  data: {type: "object"},
+                },
+                required: ["kind", "data"],
+              },
+            ],
+          },
+          {
+            properties: {
+              kind: {const: "simple"},
+              value: {type: "string"},
+            },
+            required: ["kind", "value"],
+          },
+        ],
+      }
+
+      assertValid([schema], {kind: "complex", data: {nested: "value"}})
+      assertValid([schema], {kind: "simple", value: "test"})
+
+      assertInvalid([schema], {kind: "complex", value: "test"})
+      assertInvalid([schema], {kind: "simple", data: {nested: "value"}})
+    })
+  })
+
   function assertValid(schemas: SchemaObject[], data: unknown): void {
     schemas.forEach((schema) =>
       ajvs.forEach((ajv) => assert.strictEqual(ajv.validate(schema, data), true))
