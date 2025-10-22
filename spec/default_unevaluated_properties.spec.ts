@@ -365,16 +365,8 @@ describe("defaultUnevaluatedProperties=false option", function () {
   })
 
   function assertValid(schemas: SchemaObject[], data: unknown): void {
-    schemas.forEach(
-      (schema) => ajvs.forEach((ajv) => assert.strictEqual(ajv.validate(schema, data), true))
-      // ajvs.forEach((ajv) => {
-      //   console.log(JSON.stringify(schema, null, 2));
-      //   console.log(data);
-      //   const a = ajv.validate(schema, data);
-      //   console.log(a);
-      //   console.log(ajv.errors)
-      //   assert.strictEqual(a, true)
-      // })
+    schemas.forEach((schema) =>
+      ajvs.forEach((ajv) => assert.strictEqual(ajv.validate(schema, data), true))
     )
   }
 
