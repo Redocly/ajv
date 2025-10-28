@@ -269,10 +269,10 @@ function iterateKeywords(it: SchemaObjCxt, group: RuleGroup): void {
     }
   })
 
-  function shouldForceUnevaluatedProperties(schema: AnySchemaObject, rule: Rule): boolean {
+  function shouldForceUnevaluatedProperties(schemaObj: AnySchemaObject, rule: Rule): boolean {
     return !!(
       rule.keyword === "unevaluatedProperties" &&
-      (schema.properties || schema.patternProperties) &&
+      (schemaObj.properties || schemaObj.patternProperties) &&
       !it.isAllOfVariant &&
       it.opts.defaultUnevaluatedProperties === false
     )

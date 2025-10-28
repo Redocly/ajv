@@ -102,7 +102,7 @@ const def: CodeKeywordDefinition = {
         if (schRef && !schemaHasRulesButRef(sch, it.self.RULES)) {
           sch = resolveRef.call(it.self, it.schemaEnv.root, it.baseId, schRef)
           if (sch instanceof SchemaEnv) sch = sch.schema
-          if (sch === undefined) throw new MissingRefError(it.opts.uriResolver, it.baseId, ref)
+          if (sch === undefined) throw new MissingRefError(it.opts.uriResolver, it.baseId, schRef)
         }
 
         let propSch = sch?.properties?.[tagName]
