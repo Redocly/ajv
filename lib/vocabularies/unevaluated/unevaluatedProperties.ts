@@ -47,14 +47,16 @@ const def: CodeKeywordDefinition = {
             : gen.if(unevaluatedStatic(props, key), () => unevaluatedPropCode(key))
         )
 
-      if (isForced && it.errorPath.emptyStr()) {
+      if (isForced && it.errorPath.emptyStr() && !it.compositeRule) {
         // $refs are compiled into functions
         // We need to check in runtime if function was called from allOf.
         // We need to check only on the top level of the function:
         // it is ensured with `it.errorPath.emptyStr()` check
         gen.if(_`${N.isAllOfVariant} === 0`, staticCheck)
       } else {
-        staticCheck()
+        if (!it.compositeRule || cxt.schema !== undefined) {
+          staticCheck()
+        }
       }
     }
 
