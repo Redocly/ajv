@@ -1,5 +1,6 @@
 import type {ErrorObject, Vocabulary} from "../../types"
 import limitNumber, {LimitNumberError} from "./limitNumber"
+import limitNumberExclusive, {ExclusiveLimitNumberError} from "./limitNumberExclusive"
 import multipleOf, {MultipleOfError} from "./multipleOf"
 import limitLength from "./limitLength"
 import pattern, {PatternError} from "./pattern"
@@ -13,6 +14,7 @@ import enumKeyword, {EnumError} from "./enum"
 const validation: Vocabulary = [
   // number
   limitNumber,
+  limitNumberExclusive,
   multipleOf,
   // string
   limitLength,
@@ -41,6 +43,7 @@ type LimitError = ErrorObject<
 export type ValidationKeywordError =
   | LimitError
   | LimitNumberError
+  | ExclusiveLimitNumberError
   | MultipleOfError
   | PatternError
   | RequiredError
