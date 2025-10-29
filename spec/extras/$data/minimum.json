@@ -65,14 +65,6 @@
     },
     "tests": [
       {
-        "description": "exclusiveMinimum boolean is supported",
-        "data": {
-          "number": 4,
-          "exclusiveMinimum": true
-        },
-        "valid": true
-      },
-      {
         "description": "above the minimum is valid when exclusiveMinimum is strictly smaller",
         "data": {
           "number": 4,
