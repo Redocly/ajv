@@ -191,6 +191,75 @@ describe("defaultUnevaluatedProperties=false option", function () {
       assertInvalid(schemas, {foo: {baz: 1}})
       assertInvalid(schemas, {foo: {bar: "string", baz: 1}})
     })
+
+    it("should work correctly with anyOf", () => {
+      const schema1 = {
+        type: "object",
+        properties: {
+          address: {type: "string"},
+        },
+        anyOf: [
+          {
+            type: "object",
+            required: ["firstName", "lastName"],
+            properties: {
+              firstName: {type: "string"},
+              lastName: {type: "string"},
+            },
+          },
+          {
+            type: "object",
+            required: ["name"],
+            properties: {
+              name: {type: "string"},
+            },
+          },
+        ],
+      }
+
+      const schemas = [schema1]
+      assertInvalid(schemas, {})
+      assertValid(schemas, {address: "someWhere", firstName: "John", lastName: "Doe"})
+      assertValid(schemas, {address: "someWhere", name: "John Doe"})
+      assertInvalid(schemas, {address: "someWhere", firstName: "John"})
+      assertInvalid(schemas, {address: "someWhere", foo: 1})
+      assertValid(schemas, {firstName: "John", lastName: "Doe"})
+    })
+
+    it("should work correctly with oneOf", () => {
+      const schema1 = {
+        type: "object",
+        properties: {
+          address: {type: "string"},
+        },
+        oneOf: [
+          {
+            type: "object",
+            required: ["firstName", "lastName"],
+            properties: {
+              firstName: {type: "string"},
+              lastName: {type: "string"},
+            },
+          },
+          {
+            type: "object",
+            required: ["name"],
+            properties: {
+              name: {type: "string"},
+            },
+          },
+        ],
+      }
+
+      const schemas = [schema1]
+
+      assertInvalid(schemas, {})
+      assertValid(schemas, {address: "someWhere", firstName: "John", lastName: "Doe"})
+      assertValid(schemas, {address: "someWhere", name: "John Doe"})
+      assertInvalid(schemas, {firstName: "John", lastName: "Doe", name: "JD"})
+      assertInvalid(schemas, {address: "someWhere", foo: 1})
+      assertValid(schemas, {firstName: "John", lastName: "Doe"})
+    })
   })
 
   describe("validation with $refs", () => {
