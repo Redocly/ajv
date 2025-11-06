@@ -78,7 +78,7 @@ const defaultOptions = {
 
 <sup>\*</sup> only with JSON Schema
 
-<sup>\**</sup> only with JSON Type Definition
+<sup>\*\*</sup> only with JSON Type Definition
 
 ## Strict mode options <Badge text="v7" />
 
@@ -204,6 +204,19 @@ Defines how date-time strings are parsed and validated. By default Ajv only allo
 This option makes JTD validation and parsing more permissive and non-standard. The date strings without time part will be accepted by Ajv, but will be rejected by other JTD validators.
 :::
 
+### specialNumbers <Badge text="JTD only" />
+
+Defines how special case numbers `Infinity`, `-Infinity` and `NaN` are handled.
+
+Option values:
+
+- `"fast"` - (default): Do not treat special numbers differently to normal numbers. This is the fastest method but also can produce invalid JSON if the data contains special numbers.
+- `"null"` - Special numbers will be serialized to `null` which is the correct behavior according to the JSON spec and is also the same behavior as `JSON.stringify`.
+
+::: warning The default behavior can produce invalid JSON
+Using `specialNumbers: "fast" or undefined` can produce invalid JSON when there are any special case numbers in the data.
+:::
+
 ### int32range <Badge text="JTD only" />
 
 Can be used to disable range checking for `int32` and `uint32` types.
@@ -240,7 +253,7 @@ An array or object of schemas that will be added to the instance. In case you pa
 
 ### logger
 
-Sets the logging method. Default is the global `console` object that should have methods `log`, `warn` and `error`. See [Error logging](#error-logging).
+Sets the logging method. Default is the global `console` object that should have methods `log`, `warn` and `error`. See [Error logging](./api.md#error-logging).
 
 Option values:
 
@@ -344,7 +357,7 @@ Include human-readable messages in errors. `true` by default. `false` can be pas
 
 ### uriResolver
 
-By default `uriResolver` is undefined and relies on the embedded uriResolver [uri-js-replace](https://github.com/andreinwald/uri-js-replace). Pass an object that satisfies the interface [UriResolver](https://github.com/ajv-validator/ajv/blob/master/lib/types/index.ts) to be used in replacement. One alternative is [fast-uri](https://github.com/fastify/fast-uri).
+By default `uriResolver` is undefined and relies on the embedded uriResolver [fast-uri](https://github.com/fastify/fast-uri). Pass an object that satisfies the interface [UriResolver](https://github.com/ajv-validator/ajv/blob/master/lib/types/index.ts) to be used in replacement. One alternative is [uri-js](https://github.com/garycourt/uri-js).
 
 ### code <Badge text="v7" />
 
@@ -353,8 +366,8 @@ Code generation options:
 ```typescript
 type CodeOptions = {
   es5?: boolean // to generate es5 code - by default code is es6, with "for-of" loops, "let" and "const"
-  esm?: boolean // how functions should be exported - by default CJS is used, so the validate function(s) 
-  // file can be `required`. Set this value to true to export the validate function(s) as ES Modules, enabling 
+  esm?: boolean // how functions should be exported - by default CJS is used, so the validate function(s)
+  // file can be `required`. Set this value to true to export the validate function(s) as ES Modules, enabling
   // bunlers to do their job.
   lines?: boolean // add line-breaks to code - to simplify debugging of generated functions
   source?: boolean // add `source` property (see Source below) to validating function.
@@ -373,7 +386,7 @@ type CodeOptions = {
   // _`require("./my-formats")`
   regExp: RegExpEngine
   // Pass non-standard RegExp engine to mitigate ReDoS, e.g. node-re2.
-  // During validation of a schema, code.regExp will be 
+  // During validation of a schema, code.regExp will be
   // used to match strings against regular expressions.
   // The supplied function must support the interface:
   // regExp(regex, unicodeFlag).test(string) => boolean

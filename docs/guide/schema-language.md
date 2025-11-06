@@ -2,6 +2,7 @@
 tags:
   - JTD
 ---
+
 # Choosing schema language
 
 [[toc]]
@@ -70,7 +71,7 @@ Draft-2019-09 support is provided via a separate export in order to avoid increa
 With this import Ajv supports the following features:
 
 - keywords [`unevaluatedProperties`](../json-schema.md#unevaluatedproperties) and [`unevaluatedItems`](../json-schema.md#unevaluateditems)
-- keywords [`dependentRequired`](../json-schema.md#dependentrequired), [`dependentSchemas`](../json-schema.md#dependentschemas), [`maxContains`/`minContain`](../json-schema.md#maxcontains--mincontains)
+- keywords [`dependentRequired`](../json-schema.md#dependentrequired), [`dependentSchemas`](../json-schema.md#dependentschemas), [`maxContains`/`minContains`](../json-schema.md#maxcontains-mincontains)
 - dynamic recursive references with [`recursiveAnchor`/`recursiveReference`] - see [Extending recursive schemas](./combining-schemas.md#extending-recursive-schemas)
 - draft-2019-09 meta-schema is the default.
 
@@ -123,17 +124,19 @@ See [JSON Schema](../json-schema.md) for more information and the list of define
 - Defines the shape of JSON data via strictly defined schema forms (rather than the collection of restrictions).
 - Effective support for tagged unions.
 - Designed to protect against user mistakes.
-- Supports compilation of schemas to efficient [serializers and parsers](./getting-started.md#parsing-and-serializing-json) (no need to validate as a separate step)
-- Approved as [RFC8927](https://datatracker.ietf.org/doc/rfc8927/)
+- Supports compilation of schemas to efficient [serializers and parsers](./getting-started.md#parsing-and-serializing-json) (no need to validate as a separate step).
+- Approved as [RFC8927](https://datatracker.ietf.org/doc/rfc8927/).
+- Substantial industry adoption since it was standardized in 2020, Ajv v8.12.0 fixed all reported JTD bugs.
 
 **Cons**:
 
-- Limited, compared with JSON Schema - no support for untagged unions<sup>\*</sup>, conditionals, references between different schema files<sup>\*\*</sup>, etc.
-- No meta-schema in the specification<sup>\*</sup>.
-- Brand new - limited industry adoption (as of January 2021).
+- Limited, compared with JSON Schema - no support for untagged unions<sup>1</sup>, conditionals, references between different schema files<sup>2</sup>, etc.
+- No meta-schema in the specification<sup>3</sup>.
 
-<sup>\*</sup> Ajv defines meta-schema for JTD schemas and non-standard keyword "union" that can be used inside "metadata" object.
+<sup>1</sup> Ajv defines non-standard keyword "union" that can be used inside "metadata" object.
 
-<sup>\*\*</sup> You can still combine schemas from multiple files in the application code.
+<sup>2</sup> You can still combine schemas from multiple files in the application code.
+
+<sup>3</sup> Ajv defines meta-schema for JTD schemas.
 
 See [JSON Type Definition](../json-type-definition.md) for more information and the list of defined schema forms.

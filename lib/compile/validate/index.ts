@@ -269,10 +269,10 @@ function iterateKeywords(it: SchemaObjCxt, group: RuleGroup): void {
     }
   })
 
-  function shouldForceUnevaluatedProperties(schema: AnySchemaObject, rule: Rule): boolean {
+  function shouldForceUnevaluatedProperties(schemaObj: AnySchemaObject, rule: Rule): boolean {
     return !!(
       rule.keyword === "unevaluatedProperties" &&
-      (schema.properties || schema.patternProperties) &&
+      (schemaObj.properties || schemaObj.patternProperties) &&
       !it.isAllOfVariant &&
       it.opts.defaultUnevaluatedProperties === false
     )
@@ -297,7 +297,7 @@ function checkContextTypes(it: SchemaObjCxt, types: JSONType[]): void {
       strictTypesError(it, `type "${t}" not allowed by context "${it.dataTypes.join(",")}"`)
     }
   })
-  it.dataTypes = it.dataTypes.filter((t) => includesType(types, t))
+  narrowSchemaTypes(it, types)
 }
 
 function checkMultipleTypes(it: SchemaObjCxt, ts: JSONType[]): void {
@@ -325,6 +325,15 @@ function hasApplicableType(schTs: JSONType[], kwdT: JSONType): boolean {
 
 function includesType(ts: JSONType[], t: JSONType): boolean {
   return ts.includes(t) || (t === "integer" && ts.includes("number"))
+}
+
+function narrowSchemaTypes(it: SchemaObjCxt, withTypes: JSONType[]): void {
+  const ts: JSONType[] = []
+  for (const t of it.dataTypes) {
+    if (includesType(withTypes, t)) ts.push(t)
+    else if (withTypes.includes("integer") && t === "number") ts.push("integer")
+  }
+  it.dataTypes = ts
 }
 
 function strictTypesError(it: SchemaObjCxt, msg: string): void {

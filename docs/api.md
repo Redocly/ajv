@@ -149,7 +149,7 @@ Every time this method is called the errors are overwritten so you need to copy 
 
 If the schema is asynchronous (has `$async` keyword on the top level) this method returns a Promise. See [Asynchronous validation](./guide/async-validation.md).
 
-<a name="add-schema"></a>
+<a id="add-schema"></a>
 
 ### ajv.addSchema(schema: object | object[], key?: string): Ajv
 
@@ -245,13 +245,13 @@ Formats can be also added via `formats` option.
 
 <a name="api-addkeyword"></a>
 
-### ajv.addKeyword(definition: object): Ajv
+### ajv.addKeyword(definition: string | object): Ajv
 
 Add validation keyword to Ajv instance.
 
 Keyword should be different from all standard JSON Schema keywords and different from previously defined keywords. There is no way to redefine keywords or to remove keyword definition from the instance.
 
-Keyword must start with a letter, `_` or `$`, and may continue with letters, numbers, `_`, `$`, or `-`.
+Keyword must start with an ASCII letter, `_` or `$`, and may continue with ASCII letters, numbers, `_`, `$`, `-`, or `:`.
 It is recommended to use an application-specific prefix for keywords to avoid current and future name collisions.
 
 Example Keywords:
@@ -296,6 +296,8 @@ interface KeywordDefinition {
   // if the errors were set in case of failed validation.
 }
 ```
+
+If only the property `keyword` is provided in the definition object, you can also pass the keyword name as the argument.
 
 `compile`, `macro` and `code` are mutually exclusive, only one should be used at a time. `validate` can be used separately or in addition to `compile` or `macro` to support [\$data reference](./guide/combining-schemas.md#data-reference).
 

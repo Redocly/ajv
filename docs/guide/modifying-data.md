@@ -154,7 +154,7 @@ See [discriminator](../json-schema.md#discriminator) keyword.
 
 ## Assigning defaults
 
-With [option `useDefaults`](./api.md#options) Ajv will assign values from `default` keyword in the schemas of `properties` and `items` (when it is the array of schemas) to the missing properties and items.
+With [option `useDefaults`](./options.md#options) Ajv will assign values from `default` keyword in the schemas of `properties` and `items` (when it is the array of schemas) to the missing properties and items.
 
 With the option value `"empty"` properties and items equal to `null` or `""` (empty string) will be considered missing and assigned defaults.
 
@@ -210,7 +210,7 @@ With `useDefaults` option `default` keywords throws exception during schema comp
 
 The strict mode option can change the behaviour for these unsupported defaults (`strict: false` to ignore them, `"log"` to log a warning).
 
-See [Strict mode](./strict-mode.md).
+See [Strict mode](../strict-mode.md).
 
 ::: tip Default with discriminator keyword
 Defaults will be assigned in schemas inside `oneOf` in case [discriminator](../json-schema.md#discriminator) keyword is used.
