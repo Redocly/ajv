@@ -5,8 +5,10 @@ import type {AnyValidateFunction} from "../dist/types"
 import type MissingRefError from "../dist/compile/ref_error"
 import chai from "./chai"
 import * as uriJs from "uri-js"
+import * as uriJs from "uri-js"
 const should = chai.should()
 
+const uriResolvers = [undefined, uriJs]
 const uriResolvers = [undefined, uriJs]
 
 uriResolvers.forEach((resolver) => {
@@ -14,9 +16,9 @@ uriResolvers.forEach((resolver) => {
   if (resolver !== undefined) {
     describeTitle = "uri-js resolver"
   } else {
-    describeTitle = "fast-uri resolver"
+    describeTitle = "uri-js resolver"
   } else {
-    describeTitle = "uri-js-replace resolver"
+    describeTitle = "fast-uri resolver"
   }
   describe(describeTitle, () => {
     describe("resolve", () => {
@@ -178,6 +180,41 @@ uriResolvers.forEach((resolver) => {
             const validate = ajv.compile({$ref: "//e.com/types#/definitions/int"})
             validate(1).should.equal(true)
             validate("foo").should.equal(false)
+          })
+        })
+      })
+
+      describe("URIs with encoded characters (issue #2447)", () => {
+        it("should resolve the ref", () => {
+          const schema = {
+            $ref: "#/definitions/Record%3Cstring%2CPerson%3E",
+            $schema: "http://json-schema.org/draft-07/schema#",
+            definitions: {
+              Person: {
+                type: "object",
+                properties: {
+                  firstName: {
+                    type: "string",
+                    description: "The person's first name.",
+                  },
+                },
+              },
+              "Record<string,Person>": {
+                type: "object",
+                additionalProperties: {
+                  $ref: "#/definitions/Person",
+                },
+              },
+            },
+          }
+          const data = {
+            joe: {
+              firstName: "Joe",
+            },
+          }
+          instances.forEach((ajv) => {
+            const validate = ajv.compile(schema)
+            validate(data).should.equal(true)
           })
         })
       })

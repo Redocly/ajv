@@ -4,6 +4,7 @@ import {_, getProperty, Name} from "../../compile/codegen"
 import {DiscrError, DiscrErrorObj} from "../discriminator/types"
 import {resolveRef, SchemaEnv} from "../../compile"
 import MissingRefError from "../../compile/ref_error"
+import MissingRefError from "../../compile/ref_error"
 import {schemaHasRulesButRef} from "../../compile/util"
 
 export type DiscriminatorError = DiscrErrorObj<DiscrError.Tag> | DiscrErrorObj<DiscrError.Mapping>
@@ -102,7 +103,7 @@ const def: CodeKeywordDefinition = {
         if (schRef && !schemaHasRulesButRef(sch, it.self.RULES)) {
           sch = resolveRef.call(it.self, it.schemaEnv.root, it.baseId, schRef)
           if (sch instanceof SchemaEnv) sch = sch.schema
-          if (sch === undefined) throw new MissingRefError(it.opts.uriResolver, it.baseId, ref)
+          if (sch === undefined) throw new MissingRefError(it.opts.uriResolver, it.baseId, schRef)
         }
 
         let propSch = sch?.properties?.[tagName]
