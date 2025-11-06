@@ -28,11 +28,9 @@ jobs:
         if: ${{ !github.event.release.prerelease }}
         if: ${{ !github.event.release.prerelease }}
         run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Commit bundles to ajv-dist
-        run: ./scripts/publish-bundles
-        env:
-          GH_TOKEN_PUBLIC: ${{ secrets.GH_TOKEN_PUBLIC }}
-          GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
-          GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+      # - name: Commit bundles to ajv-dist
+      #   run: ./scripts/publish-bundles
+      #   env:
+      #     GH_TOKEN_PUBLIC: ${{ secrets.GH_TOKEN_PUBLIC }}
+      #     GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+      #     GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
