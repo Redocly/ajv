@@ -44,7 +44,10 @@
       "text-summary"
     ]
   },
-  "repository": "ajv-validator/ajv",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Redocly/ajv.git"
+  },
   "keywords": [
     "JSON",
     "schema",
@@ -57,8 +60,6 @@
   ],
   "author": "Evgeny Poberezkin",
   "license": "MIT",
-  "bugs": "https://github.com/ajv-validator/ajv/issues",
-  "homepage": "https://ajv.js.org",
   "runkitExampleFilename": ".runkit_example.js",
   "dependencies": {
     "fast-deep-equal": "^3.1.3",
