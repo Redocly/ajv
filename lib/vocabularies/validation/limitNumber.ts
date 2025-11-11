@@ -4,27 +4,48 @@ import {_, str, operators, Code} from "../../compile/codegen"
 
 const ops = operators
 
-type Kwd = "maximum" | "minimum" | "exclusiveMaximum" | "exclusiveMinimum"
+export type LimitKwd = "maximum" | "minimum"
+export type ExclusiveLimitKwd = "exclusiveMaximum" | "exclusiveMinimum"
 
 type Comparison = "<=" | ">=" | "<" | ">"
 
-const KWDs: {[K in Kwd]: {okStr: Comparison; ok: Code; fail: Code}} = {
-  maximum: {okStr: "<=", ok: ops.LTE, fail: ops.GT},
-  minimum: {okStr: ">=", ok: ops.GTE, fail: ops.LT},
-  exclusiveMaximum: {okStr: "<", ok: ops.LT, fail: ops.GTE},
-  exclusiveMinimum: {okStr: ">", ok: ops.GT, fail: ops.LTE},
+interface KwdOp {
+  okStr: Comparison
+  ok: Code
+  fail: Code
+}
+
+interface KwdDef {
+  exclusive: ExclusiveLimitKwd
+  ops: [KwdOp, KwdOp]
+}
+
+const KWDs: {[K in LimitKwd]: KwdDef} = {
+  maximum: {
+    exclusive: "exclusiveMaximum",
+    ops: [
+      {okStr: "<=", ok: ops.LTE, fail: ops.GT},
+      {okStr: "<", ok: ops.LT, fail: ops.GTE},
+    ],
+  },
+  minimum: {
+    exclusive: "exclusiveMinimum",
+    ops: [
+      {okStr: ">=", ok: ops.GTE, fail: ops.LT},
+      {okStr: ">", ok: ops.GT, fail: ops.LTE},
+    ],
+  },
 }
 
 export type LimitNumberError = ErrorObject<
-  Kwd,
+  LimitKwd,
   {limit: number; comparison: Comparison},
   number | {$data: string}
 >
 
 const error: KeywordErrorDefinition = {
-  message: ({keyword, schemaCode}) => str`must be ${KWDs[keyword as Kwd].okStr} ${schemaCode}`,
-  params: ({keyword, schemaCode}) =>
-    _`{comparison: ${KWDs[keyword as Kwd].okStr}, limit: ${schemaCode}}`,
+  message: (cxt) => str`must be ${kwdOp(cxt).okStr} ${cxt.schemaCode}`,
+  params: (cxt) => _`{comparison: ${kwdOp(cxt).okStr}, limit: ${cxt.schemaCode}}`,
 }
 
 const def: CodeKeywordDefinition = {
@@ -34,9 +55,21 @@ const def: CodeKeywordDefinition = {
   $data: true,
   error,
   code(cxt: KeywordCxt) {
-    const {keyword, data, schemaCode} = cxt
-    cxt.fail$data(_`${data} ${KWDs[keyword as Kwd].fail} ${schemaCode} || isNaN(${data})`)
+    const {data, schemaCode} = cxt
+    cxt.fail$data(_`${data} ${kwdOp(cxt).fail} ${schemaCode} || isNaN(${data})`)
   },
+}
+
+export function kwdOp(cxt: {keyword: string; parentSchema?: any}): KwdOp {
+  const {keyword} = cxt
+
+  // Handle maximum/minimum keywords (Draft-04 style with potential boolean modifiers)
+  const limitKeyword = keyword as LimitKwd
+  const exclusive = cxt.parentSchema?.[KWDs[limitKeyword].exclusive]
+  // Only use exclusive operators if the exclusive keyword is a boolean (Draft-04 style)
+  // If it's a number, it's an independent constraint (Draft-06+ style)
+  const opsIdx = exclusive === true ? 1 : 0
+  return KWDs[limitKeyword].ops[opsIdx]
 }
 
 export default def
