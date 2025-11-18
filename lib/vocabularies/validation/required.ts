@@ -54,11 +54,10 @@ const def: CodeKeywordDefinition = {
         for (const prop of schema) {
           const propSchema = cxt.parentSchema.properties?.[prop]
           if (propSchema && (propSchema?.writeOnly === true || propSchema?.readOnly === true)) {
-            const valid = gen.let("valid", true)
-            cxt.ok(valid)
-          } else {
-            checkReportMissingProp(cxt, prop)
+            continue
           }
+
+          checkReportMissingProp(cxt, prop)
         }
       }
     }
