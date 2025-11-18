@@ -52,6 +52,11 @@ const def: CodeKeywordDefinition = {
         cxt.block$data(nil, loopAllRequired)
       } else {
         for (const prop of schema) {
+          const propSchema = cxt.parentSchema.properties?.[prop]
+          if (propSchema && (propSchema?.writeOnly === true || propSchema?.readOnly === true)) {
+            continue
+          }
+
           checkReportMissingProp(cxt, prop)
         }
       }
