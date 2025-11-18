@@ -52,11 +52,8 @@ const def: CodeKeywordDefinition = {
         cxt.block$data(nil, loopAllRequired)
       } else {
         for (const prop of schema) {
-          if (
-            cxt.parentSchema.properties[prop] &&
-            (cxt.parentSchema.properties[prop].writeOnly === true ||
-              cxt.parentSchema.properties[prop].readOnly === true)
-          ) {
+          const propSchema = cxt.parentSchema.properties?.[prop]
+          if (propSchema && (propSchema?.writeOnly === true || propSchema?.readOnly === true)) {
             const valid = gen.let("valid", true)
             cxt.ok(valid)
           } else {
