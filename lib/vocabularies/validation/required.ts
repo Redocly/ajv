@@ -73,7 +73,6 @@ const def: CodeKeywordDefinition = {
         cxt.block$data(valid, () => loopUntilMissing(missing, valid))
         cxt.ok(valid)
       } else {
-        console.log("Report from exitOnErrorMode")
         gen.if(checkMissingProp(cxt, schema, missing))
         reportMissingProp(cxt, missing)
         gen.else()
@@ -82,7 +81,6 @@ const def: CodeKeywordDefinition = {
 
     function loopAllRequired(): void {
       gen.forOf("prop", schemaCode as Code, (prop) => {
-        console.log("Report from loopAllRequired")
         cxt.setParams({missingProperty: prop})
         gen.if(noPropertyInData(gen, data, prop, opts.ownProperties), () => cxt.error())
       })
