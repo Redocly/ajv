@@ -344,6 +344,15 @@ export default class Ajv {
     return (this.opts.defaultMeta = typeof meta == "object" ? meta[schemaId] || meta : undefined)
   }
 
+  // Set the defaultUnevaluatedProperties option.
+  // WARNING: This only affects schemas compiled AFTER this method is called.
+  // Already-compiled schemas in the cache will NOT be affected.
+  // Consider clearing the cache or creating a new Ajv instance if you need
+  // different behavior for the same schemas.
+  setDefaultUnevaluatedProperties(value: boolean): void {
+    this.opts.defaultUnevaluatedProperties = value
+  }
+
   // Validate data using schema
   // AnySchema will be compiled and cached using schema itself as a key for Map
   validate(schema: Schema | string, data: unknown): boolean
