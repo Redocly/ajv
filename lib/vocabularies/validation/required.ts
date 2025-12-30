@@ -1,12 +1,6 @@
 import type {CodeKeywordDefinition, ErrorObject, KeywordErrorDefinition} from "../../types"
 import type {KeywordCxt} from "../../compile/validate"
-import {
-  checkReportMissingProp,
-  checkMissingProp,
-  reportMissingProp,
-  propertyInData,
-  noPropertyInData,
-} from "../code"
+import {checkReportMissingProp, propertyInData, noPropertyInData} from "../code"
 import {_, str, nil, not, Name, Code} from "../../compile/codegen"
 import {checkStrictMode} from "../../compile/util"
 
@@ -47,17 +41,57 @@ const def: CodeKeywordDefinition = {
       }
     }
 
+    function generateRuntimeContextCheck(
+      skipProp: Name,
+      hasReadOnly: boolean,
+      hasWriteOnly: boolean
+    ): void {
+      gen.if(_`self.opts.additionalContext`, () => {
+        const ctx = gen.const("ctx", _`self.opts.additionalContext`)
+
+        if (hasReadOnly) {
+          gen.if(_`typeof ${ctx} === "string" && ${ctx}.toLowerCase() === "request"`, () =>
+            gen.assign(skipProp, true)
+          )
+        }
+
+        if (hasWriteOnly) {
+          gen.if(_`typeof ${ctx} === "string" && ${ctx}.toLowerCase() === "response"`, () =>
+            gen.assign(skipProp, true)
+          )
+        }
+      })
+    }
+
+    function generateContextCheckForProp(prop: string): void {
+      const propSchema = cxt.parentSchema.properties?.[prop]
+      if (!propSchema) {
+        checkReportMissingProp(cxt, prop)
+        return
+      }
+
+      const hasReadOnly = propSchema.readOnly === true
+      const hasWriteOnly = propSchema.writeOnly === true
+
+      if (!hasReadOnly && !hasWriteOnly) {
+        checkReportMissingProp(cxt, prop)
+        return
+      }
+
+      const contextCheck = gen.let("skipProp", false)
+      generateRuntimeContextCheck(contextCheck, hasReadOnly, hasWriteOnly)
+
+      gen.if(not(contextCheck), () => {
+        checkReportMissingProp(cxt, prop)
+      })
+    }
+
     function allErrorsMode(): void {
       if (useLoop || $data) {
         cxt.block$data(nil, loopAllRequired)
       } else {
         for (const prop of schema) {
-          const propSchema = cxt.parentSchema.properties?.[prop]
-          if (propSchema && (propSchema?.writeOnly === true || propSchema?.readOnly === true)) {
-            continue
-          }
-
-          checkReportMissingProp(cxt, prop)
+          generateContextCheckForProp(prop)
         }
       }
     }
@@ -69,9 +103,9 @@ const def: CodeKeywordDefinition = {
         cxt.block$data(valid, () => loopUntilMissing(missing, valid))
         cxt.ok(valid)
       } else {
-        gen.if(checkMissingProp(cxt, schema, missing))
-        reportMissingProp(cxt, missing)
-        gen.else()
+        for (const prop of schema) {
+          generateContextCheckForProp(prop)
+        }
       }
     }
 

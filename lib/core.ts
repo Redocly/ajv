@@ -74,6 +74,7 @@ const META_IGNORE_OPTIONS: (keyof Options)[] = [
   "coerceTypes",
   "defaultUnevaluatedProperties",
   "defaultAdditionalProperties",
+  "additionalContext",
 ]
 const EXT_SCOPE_NAMES = new Set([
   "validate",
@@ -126,6 +127,7 @@ export interface CurrentOptions {
   // options to modify validated data:
   removeAdditional?: boolean | "all" | "failing"
   defaultUnevaluatedProperties?: boolean
+  additionalContext?: string | Record<string, any>
   defaultAdditionalProperties?: boolean // @deprecated
 
   useDefaults?: boolean | "empty"
@@ -670,6 +672,10 @@ export default class Ajv {
     return errors
       .map((e) => `${dataVar}${e.instancePath} ${e.message}`)
       .reduce((text, msg) => text + separator + msg)
+  }
+
+  setAdditionalContext(data: string | Record<string, any>): void {
+    this.opts.additionalContext = data
   }
 
   $dataMetaSchema(metaSchema: AnySchemaObject, keywordsJsonPointers: string[]): AnySchemaObject {
