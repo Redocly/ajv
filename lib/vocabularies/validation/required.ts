@@ -1,13 +1,7 @@
 import type {CodeKeywordDefinition, ErrorObject, KeywordErrorDefinition} from "../../types"
 import type {KeywordCxt} from "../../compile/validate"
-import {
-  checkReportMissingProp,
-  checkMissingProp,
-  reportMissingProp,
-  propertyInData,
-  noPropertyInData,
-} from "../code"
-import {_, str, nil, not, Name, Code} from "../../compile/codegen"
+import {checkReportMissingProp, reportMissingProp, propertyInData, noPropertyInData} from "../code"
+import {_, str, nil, not, and, or, Name, Code} from "../../compile/codegen"
 import {checkStrictMode} from "../../compile/util"
 
 export type RequiredError = ErrorObject<
@@ -38,6 +32,7 @@ const def: CodeKeywordDefinition = {
     if (opts.strictRequired) {
       const props = cxt.parentSchema.properties
       const {definedProperties} = cxt.it
+
       for (const requiredKey of schema) {
         if (props?.[requiredKey] === undefined && !definedProperties.has(requiredKey)) {
           const schemaPath = it.schemaEnv.baseId + it.errSchemaPath
@@ -47,12 +42,51 @@ const def: CodeKeywordDefinition = {
       }
     }
 
+    // Checks if a property should be skipped based on readOnly/writeOnly and validationContext
+    function shouldSkipProperty(prop: string): Code | undefined {
+      const propSchema = cxt.parentSchema.properties?.[prop]
+      if (!propSchema) return undefined
+
+      const hasReadOnly = propSchema.readOnly === true
+      const hasWriteOnly = propSchema.writeOnly === true
+
+      if (!hasReadOnly && !hasWriteOnly) return undefined
+
+      // Generate runtime check for validationContext
+      if (it.validationContext) {
+        const conditions: Code[] = []
+
+        if (hasReadOnly) {
+          // Skip readOnly properties when operation is "request"
+          conditions.push(
+            _`${it.validationContext} && ${it.validationContext}.operation === "request"`
+          )
+        }
+
+        if (hasWriteOnly) {
+          // Skip writeOnly properties when operation is "response"
+          conditions.push(
+            _`${it.validationContext} && ${it.validationContext}.operation === "response"`
+          )
+        }
+
+        return conditions.length === 1 ? conditions[0] : or(...conditions)
+      }
+
+      return undefined
+    }
+
     function allErrorsMode(): void {
       if (useLoop || $data) {
         cxt.block$data(nil, loopAllRequired)
       } else {
         for (const prop of schema) {
-          checkReportMissingProp(cxt, prop)
+          const skipCondition = shouldSkipProperty(prop)
+          if (skipCondition) {
+            gen.if(not(skipCondition), () => checkReportMissingProp(cxt, prop))
+          } else {
+            checkReportMissingProp(cxt, prop)
+          }
         }
       }
     }
@@ -64,7 +98,24 @@ const def: CodeKeywordDefinition = {
         cxt.block$data(valid, () => loopUntilMissing(missing, valid))
         cxt.ok(valid)
       } else {
-        gen.if(checkMissingProp(cxt, schema, missing))
+        // Check if any required properties are missing (with context awareness)
+        const checks: Code[] = []
+        for (const prop of schema) {
+          const skipCondition = shouldSkipProperty(prop)
+          const missingCheck = and(
+            noPropertyInData(gen, data, prop, opts.ownProperties),
+            _`${missing} = ${prop}`
+          )
+
+          if (skipCondition) {
+            // Only check if we shouldn't skip this property
+            checks.push(and(not(skipCondition), missingCheck))
+          } else {
+            checks.push(missingCheck)
+          }
+        }
+
+        gen.if(or(...checks))
         reportMissingProp(cxt, missing)
         gen.else()
       }
