@@ -12,7 +12,9 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 18.x, 20.x, 21.x]
+        # 16.x is no longer used in Redocly CLI v2
+        # Removed because of an error with re2 v1.23
+        node-version: [18.x, 20.x, 21.x]
 
     steps:
       - uses: actions/checkout@v4
