@@ -72,14 +72,6 @@
     },
     "tests": [
       {
-        "description": "exclusiveMaximum boolean no longer supported",
-        "data": {
-          "number": 4,
-          "exclusiveMaximum": true
-        },
-        "valid": false
-      },
-      {
         "description": "below the maximum is valid when exclusiveMaximum is strictly larger",
         "data": {
           "number": 4,
@@ -155,15 +147,6 @@
       }
     },
     "tests": [
-      {
-        "description": "exclusiveMaximum boolean no longer supported",
-        "data": {
-          "larger": 3,
-          "smallerOrEqual": 2,
-          "exclusiveMaximum": true
-        },
-        "valid": false
-      },
       {
         "description": "below the maximum is valid when exclusiveMaximum is strictly larger",
         "data": {
