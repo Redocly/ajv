@@ -66,9 +66,7 @@ function validateFunction(
 function destructureValCxt(opts: InstanceOptions): Code {
   return _`{${N.instancePath}="", ${N.parentData}, ${N.parentDataProperty}, ${N.rootData}=${
     N.data
-  }${opts.dynamicRef ? _`, ${N.dynamicAnchors}={}` : nil}, ${N.validationContext}, ${
-    N.isAllOfVariant
-  } = 0}={}`
+  }${opts.dynamicRef ? _`, ${N.dynamicAnchors}={}` : nil}, ${N.isAllOfVariant} = 0}={}`
 }
 
 function destructureValCxtES5(gen: CodeGen, opts: InstanceOptions): void {
@@ -80,7 +78,6 @@ function destructureValCxtES5(gen: CodeGen, opts: InstanceOptions): void {
       gen.var(N.parentDataProperty, _`${N.valCxt}.${N.parentDataProperty}`)
       gen.var(N.rootData, _`${N.valCxt}.${N.rootData}`)
       gen.var(N.isAllOfVariant, _`${N.valCxt}.${N.isAllOfVariant}`)
-      gen.var(N.validationContext, _`${N.valCxt}.${N.validationContext}`)
       if (opts.dynamicRef) gen.var(N.dynamicAnchors, _`${N.valCxt}.${N.dynamicAnchors}`)
     },
     () => {
@@ -89,7 +86,6 @@ function destructureValCxtES5(gen: CodeGen, opts: InstanceOptions): void {
       gen.var(N.parentDataProperty, _`undefined`)
       gen.var(N.rootData, N.data)
       gen.var(N.isAllOfVariant, _`0`)
-      gen.var(N.validationContext, _`undefined`)
       if (opts.dynamicRef) gen.var(N.dynamicAnchors, _`{}`)
     }
   )

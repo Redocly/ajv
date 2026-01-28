@@ -2,6 +2,7 @@ import type {CodeKeywordDefinition, ErrorObject, KeywordErrorDefinition} from ".
 import type {KeywordCxt} from "../../compile/validate"
 import {checkReportMissingProp, reportMissingProp, propertyInData, noPropertyInData} from "../code"
 import {_, str, nil, not, and, or, Name, Code} from "../../compile/codegen"
+import N from "../../compile/names"
 import {checkStrictMode} from "../../compile/util"
 
 export type RequiredError = ErrorObject<
@@ -42,7 +43,6 @@ const def: CodeKeywordDefinition = {
       }
     }
 
-    // Checks if a property should be skipped based on readOnly/writeOnly and validationContext
     function shouldSkipProperty(prop: string): Code | undefined {
       const propSchema = cxt.parentSchema.properties?.[prop]
       if (!propSchema) return undefined
@@ -52,24 +52,20 @@ const def: CodeKeywordDefinition = {
 
       if (!hasReadOnly && !hasWriteOnly) return undefined
 
-      // Generate runtime check for validationContext
-      if (it.validationContext) {
-        const conditions: Code[] = []
+      const conditions: Code[] = []
+      const oasContext = _`typeof ${N.this} == "object" && ${N.this} && ${N.this}.oas`
 
-        if (hasReadOnly) {
-          // Skip readOnly properties when operation is "request"
-          conditions.push(
-            _`${it.validationContext} && ${it.validationContext}.operation === "request"`
-          )
-        }
+      if (hasReadOnly) {
+        // Skip readOnly properties in request context
+        conditions.push(_`${oasContext} && ${N.this}.oas.mode === "request"`)
+      }
 
-        if (hasWriteOnly) {
-          // Skip writeOnly properties when operation is "response"
-          conditions.push(
-            _`${it.validationContext} && ${it.validationContext}.operation === "response"`
-          )
-        }
+      if (hasWriteOnly) {
+        // Skip writeOnly properties in response context
+        conditions.push(_`${oasContext} && ${N.this}.oas.mode === "response"`)
+      }
 
+      if (conditions.length) {
         return conditions.length === 1 ? conditions[0] : or(...conditions)
       }
 
@@ -82,6 +78,7 @@ const def: CodeKeywordDefinition = {
       } else {
         for (const prop of schema) {
           const skipCondition = shouldSkipProperty(prop)
+
           if (skipCondition) {
             gen.if(not(skipCondition), () => checkReportMissingProp(cxt, prop))
           } else {

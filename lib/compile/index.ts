@@ -57,7 +57,6 @@ export interface SchemaCxt {
   readonly opts: InstanceOptions // Ajv instance option.
   readonly self: Ajv // current Ajv instance
   readonly isAllOfVariant?: boolean // if the current schema is direct child of allOf
-  readonly validationContext?: Name
 }
 
 export interface SchemaObjCxt extends SchemaCxt {
@@ -136,7 +135,6 @@ export function compileSchema(this: Ajv, sch: SchemaEnv): SchemaEnv {
     data: N.data,
     parentData: N.parentData,
     parentDataProperty: N.parentDataProperty,
-    validationContext: N.validationContext,
     dataNames: [N.data],
     dataPathArr: [nil], // TODO can its length be used as dataLevel if nil is removed?
     dataLevel: 0,

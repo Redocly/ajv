@@ -39,18 +39,12 @@ export interface SourceCode {
   evaluated?: Code
 }
 
-export interface ValidationContext {
-  operation?: string
-  [key: string]: any
-}
-
 export interface DataValidationCxt<T extends string | number = string | number> {
   instancePath: string
   parentData: {[K in T]: any} // object or array
   parentDataProperty: T // string or number
   rootData: Record<string, any> | any[]
   dynamicAnchors: {[Ref in string]?: ValidateFunction}
-  validationContext?: ValidationContext
 }
 
 export interface ValidateFunction<T = unknown> {
