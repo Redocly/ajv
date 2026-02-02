@@ -43,7 +43,7 @@ const def: CodeKeywordDefinition = {
       }
     }
 
-    function shouldSkipProperty(prop: string): Code | undefined {
+    function getSkipCondition(prop: string): Code | undefined {
       const propSchema = cxt.parentSchema.properties?.[prop]
       if (!propSchema) return undefined
 
@@ -56,12 +56,10 @@ const def: CodeKeywordDefinition = {
       const oasContext = _`typeof ${N.this} == "object" && ${N.this} && ${N.this}.oas`
 
       if (hasReadOnly) {
-        // Skip readOnly properties in request context
         conditions.push(_`${oasContext} && ${N.this}.oas.mode === "request"`)
       }
 
       if (hasWriteOnly) {
-        // Skip writeOnly properties in response context
         conditions.push(_`${oasContext} && ${N.this}.oas.mode === "response"`)
       }
 
@@ -77,13 +75,12 @@ const def: CodeKeywordDefinition = {
         cxt.block$data(nil, loopAllRequired)
       } else {
         for (const prop of schema) {
-          const skipCondition = shouldSkipProperty(prop)
-
-          if (skipCondition) {
-            gen.if(not(skipCondition), () => checkReportMissingProp(cxt, prop))
-          } else {
-            checkReportMissingProp(cxt, prop)
-          }
+          const skip = getSkipCondition(prop) ?? _`false`
+          /**
+           * Generate a runtime check: validate `required` only when this property
+           * should NOT be skipped in the current context (readOnly/writeOnly).
+           */
+          gen.if(not(skip), () => checkReportMissingProp(cxt, prop))
         }
       }
     }
@@ -95,24 +92,19 @@ const def: CodeKeywordDefinition = {
         cxt.block$data(valid, () => loopUntilMissing(missing, valid))
         cxt.ok(valid)
       } else {
-        // Check if any required properties are missing (with context awareness)
         const checks: Code[] = []
         for (const prop of schema) {
-          const skipCondition = shouldSkipProperty(prop)
           const missingCheck = and(
+            not(getSkipCondition(prop) ?? _`false`),
             noPropertyInData(gen, data, prop, opts.ownProperties),
             _`${missing} = ${prop}`
           )
 
-          if (skipCondition) {
-            // Only check if we shouldn't skip this property
-            checks.push(and(not(skipCondition), missingCheck))
-          } else {
-            checks.push(missingCheck)
-          }
+          checks.push(missingCheck)
         }
 
         gen.if(or(...checks))
+
         reportMissingProp(cxt, missing)
         gen.else()
       }
