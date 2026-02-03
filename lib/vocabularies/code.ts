@@ -5,6 +5,30 @@ import {CodeGen, _, and, or, not, nil, strConcat, getProperty, Code, Name} from 
 import {alwaysValidSchema, Type} from "../compile/util"
 import N from "../compile/names"
 import {useFunc} from "../compile/util"
+
+export function getSkipCondition(cxt: KeywordCxt, prop: string): Code | undefined {
+  const propSchema = cxt.parentSchema.properties?.[prop]
+  if (!propSchema) return undefined
+
+  const hasReadOnly = propSchema.readOnly === true
+  const hasWriteOnly = propSchema.writeOnly === true
+
+  if (!hasReadOnly && !hasWriteOnly) return undefined
+
+  const conditions: Code[] = []
+  const oasContext = _`typeof ${N.this} == "object" && ${N.this} && ${N.this}.oas`
+
+  if (hasReadOnly) {
+    conditions.push(_`${oasContext} && ${N.this}.oas.mode === "request"`)
+  }
+
+  if (hasWriteOnly) {
+    conditions.push(_`${oasContext} && ${N.this}.oas.mode === "response"`)
+  }
+
+  return conditions.length === 1 ? conditions[0] : or(...conditions)
+}
+
 export function checkReportMissingProp(cxt: KeywordCxt, prop: string): void {
   const {gen, data, it} = cxt
   gen.if(noPropertyInData(gen, data, prop, it.opts.ownProperties), () => {
@@ -13,14 +37,19 @@ export function checkReportMissingProp(cxt: KeywordCxt, prop: string): void {
   })
 }
 
-export function checkMissingProp(
-  {gen, data, it: {opts}}: KeywordCxt,
-  properties: string[],
-  missing: Name
-): Code {
+export function checkMissingProp(cxt: KeywordCxt, properties: string[], missing: Name): Code {
+  const {
+    gen,
+    data,
+    it: {opts},
+  } = cxt
   return or(
     ...properties.map((prop) =>
-      and(noPropertyInData(gen, data, prop, opts.ownProperties), _`${missing} = ${prop}`)
+      and(
+        not(getSkipCondition(cxt, prop) ?? _`false`),
+        noPropertyInData(gen, data, prop, opts.ownProperties),
+        _`${missing} = ${prop}`
+      )
     )
   )
 }
