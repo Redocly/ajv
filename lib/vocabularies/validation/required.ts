@@ -39,7 +39,6 @@ const def: CodeKeywordDefinition = {
     if (opts.strictRequired) {
       const props = cxt.parentSchema.properties
       const {definedProperties} = cxt.it
-
       for (const requiredKey of schema) {
         if (props?.[requiredKey] === undefined && !definedProperties.has(requiredKey)) {
           const schemaPath = it.schemaEnv.baseId + it.errSchemaPath
