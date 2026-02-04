@@ -5,7 +5,6 @@ export const metadataVocabulary: Vocabulary = [
   "description",
   "default",
   "deprecated",
-  "examples",
   /**
    * readOnly/writeOnly are handled as validation keywords when OAS context is provided.
    * Keeping them here would register them as annotation-only metadata and would
@@ -16,6 +15,7 @@ export const metadataVocabulary: Vocabulary = [
    */
   // "readOnly",
   // "writeOnly",
+  "examples",
 ]
 
 export const contentVocabulary: Vocabulary = [

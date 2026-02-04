@@ -2,10 +2,10 @@ import type {CodeKeywordDefinition, ErrorObject, KeywordErrorDefinition} from ".
 import type {KeywordCxt} from "../../compile/validate"
 import {
   checkReportMissingProp,
+  checkMissingProp,
   reportMissingProp,
   propertyInData,
   noPropertyInData,
-  checkMissingProp,
 } from "../code"
 import {getSkipCondition} from "../oasContext"
 import {_, str, nil, not, Name, Code} from "../../compile/codegen"
