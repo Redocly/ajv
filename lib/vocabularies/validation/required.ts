@@ -7,6 +7,7 @@ import {
   propertyInData,
   noPropertyInData,
 } from "../code"
+import {getSkipCondition} from "../oasContext"
 import {_, str, nil, not, Name, Code} from "../../compile/codegen"
 import {checkStrictMode} from "../../compile/util"
 
@@ -52,7 +53,12 @@ const def: CodeKeywordDefinition = {
         cxt.block$data(nil, loopAllRequired)
       } else {
         for (const prop of schema) {
-          checkReportMissingProp(cxt, prop)
+          const skip = getSkipCondition(cxt.parentSchema, prop) ?? _`false`
+          /**
+           * Generate a runtime check: validate `required` only when this property
+           * should NOT be skipped in the current context (readOnly/writeOnly).
+           */
+          gen.if(not(skip), () => checkReportMissingProp(cxt, prop))
         }
       }
     }

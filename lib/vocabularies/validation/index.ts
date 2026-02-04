@@ -5,6 +5,8 @@ import limitLength from "./limitLength"
 import pattern, {PatternError} from "./pattern"
 import limitProperties from "./limitProperties"
 import required, {RequiredError} from "./required"
+import readOnlyKeyword from "./readOnly"
+import writeOnlyKeyword from "./writeOnly"
 import limitItems from "./limitItems"
 import uniqueItems, {UniqueItemsError} from "./uniqueItems"
 import constKeyword, {ConstError} from "./const"
@@ -20,6 +22,8 @@ const validation: Vocabulary = [
   // object
   limitProperties,
   required,
+  readOnlyKeyword,
+  writeOnlyKeyword,
   // array
   limitItems,
   uniqueItems,

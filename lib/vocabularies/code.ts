@@ -5,6 +5,7 @@ import {CodeGen, _, and, or, not, nil, strConcat, getProperty, Code, Name} from 
 import {alwaysValidSchema, Type} from "../compile/util"
 import N from "../compile/names"
 import {useFunc} from "../compile/util"
+import {getSkipCondition} from "./oasContext"
 export function checkReportMissingProp(cxt: KeywordCxt, prop: string): void {
   const {gen, data, it} = cxt
   gen.if(noPropertyInData(gen, data, prop, it.opts.ownProperties), () => {
@@ -14,13 +15,17 @@ export function checkReportMissingProp(cxt: KeywordCxt, prop: string): void {
 }
 
 export function checkMissingProp(
-  {gen, data, it: {opts}}: KeywordCxt,
+  {gen, data, it: {opts}, parentSchema}: KeywordCxt,
   properties: string[],
   missing: Name
 ): Code {
   return or(
     ...properties.map((prop) =>
-      and(noPropertyInData(gen, data, prop, opts.ownProperties), _`${missing} = ${prop}`)
+      and(
+        not(getSkipCondition(parentSchema, prop) ?? _`false`),
+        noPropertyInData(gen, data, prop, opts.ownProperties),
+        _`${missing} = ${prop}`
+      )
     )
   )
 }
