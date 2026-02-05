@@ -68,6 +68,7 @@ export {
   AsyncValidateFunction,
   ErrorObject,
   ErrorNoParams,
+  Context,
 } from "./types"
 
 export {Plugin, Options, CodeOptions, InstanceOptions, Logger, ErrorsTextOptions} from "./core"

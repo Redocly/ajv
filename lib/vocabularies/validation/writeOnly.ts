@@ -4,11 +4,8 @@ import {_, str} from "../../compile/codegen"
 import N from "../../compile/names"
 
 const error: KeywordErrorDefinition = {
-  message: ({params}) =>
-    str`must NOT be present in ${params.mode || "this context"}${
-      params.location ? str` (${params.location})` : ""
-    }`,
-  params: ({params}) => _`{mode: ${params.mode}, location: ${params.location}}`,
+  message: ({params}) => str`must NOT be present in ${params.context || "this"} context`,
+  params: ({params}) => _`{context: ${params.context}}`,
 }
 
 const def: CodeKeywordDefinition = {
@@ -17,12 +14,10 @@ const def: CodeKeywordDefinition = {
   error,
   code(cxt: KeywordCxt) {
     if (cxt.schema !== true) return
-    const mode = _`(${N.this} && ${N.this}.oas ? ${N.this}.oas.mode : undefined)`
-    const location = _`(${N.this} && ${N.this}.oas ? ${N.this}.oas.location : undefined)`
-    cxt.setParams({mode, location})
-    cxt.fail(
-      _`typeof ${N.this} == "object" && ${N.this} && ${N.this}.oas && ${N.this}.oas.mode === "response"`
-    )
+    const apiContext = _`(${N.this} && ${N.this}.apiContext)`
+
+    cxt.setParams({context: apiContext})
+    cxt.fail(_`${apiContext} === "response"`)
   },
 }
 

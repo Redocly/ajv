@@ -242,3 +242,7 @@ export interface UriResolver {
   resolve(base: string, path: string): string
   serialize(component: URIComponent): string
 }
+
+export interface Context {
+  apiContext?: "request" | "response"
+}
