@@ -11,7 +11,7 @@ const metadataVocabulary: Vocabulary = ["title", "description", "default"]
 
 const coreVocabulary: Vocabulary = [
   "$schema",
-  "$id",
+  "id",
   "$defs",
   {keyword: "$comment"},
   "definitions",
