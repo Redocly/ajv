@@ -4,8 +4,7 @@ import {_, str} from "../../compile/codegen"
 import N from "../../compile/names"
 
 const error: KeywordErrorDefinition = {
-  message: ({params}) => str`must NOT be present in ${params.context || "this"} context`,
-  params: ({params}) => _`{context: ${params.context}}`,
+  message: () => str`must NOT be present in request context`,
 }
 
 const def: CodeKeywordDefinition = {
@@ -17,7 +16,6 @@ const def: CodeKeywordDefinition = {
 
     const apiContext = _`(${N.this} && ${N.this}.apiContext)`
 
-    cxt.setParams({context: _`${apiContext}`})
     cxt.fail(_`${apiContext} === "request"`)
   },
 }

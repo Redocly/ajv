@@ -23,5 +23,5 @@ export function getSkipCondition(schema: AnySchemaObject, prop: string): Code | 
     conditions.push(_`${apiContext} === "response"`)
   }
 
-  return conditions.length === 1 ? conditions[0] : or(...conditions)
+  return or(...conditions)
 }
