@@ -13,15 +13,15 @@ export function getSkipCondition(schema: AnySchemaObject, prop: string): Code | 
   if (!hasReadOnly && !hasWriteOnly) return undefined
 
   const conditions: Code[] = []
-  const oasContext = _`typeof ${N.this} == "object" && ${N.this} && ${N.this}.oas`
+  const apiContext = _`typeof ${N.this} == "object" && ${N.this} && ${N.this}.apiContext`
 
   if (hasReadOnly) {
-    conditions.push(_`${oasContext} && ${N.this}.oas.mode === "request"`)
+    conditions.push(_`${apiContext} === "request"`)
   }
 
   if (hasWriteOnly) {
-    conditions.push(_`${oasContext} && ${N.this}.oas.mode === "response"`)
+    conditions.push(_`${apiContext} === "response"`)
   }
 
-  return conditions.length === 1 ? conditions[0] : or(...conditions)
+  return or(...conditions)
 }
