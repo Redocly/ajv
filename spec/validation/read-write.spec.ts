@@ -1,10 +1,8 @@
-import type {DataValidationCxt} from "../../lib/types"
+import type {DataValidationCxt, Context} from "../../lib/types"
 import Ajv from "../ajv"
 import chai from "../chai"
 
 chai.should()
-
-type OasMode = "request" | "response"
 
 function buildContext(data: unknown): DataValidationCxt {
   const dynamicAnchors: DataValidationCxt["dynamicAnchors"] = {}
@@ -21,17 +19,9 @@ function getAjv() {
   return new Ajv({passContext: true})
 }
 
-function getOasContext(mode: OasMode, location?: "requestBody" | "responseBody") {
-  return {oas: {mode, location}}
-}
-
 type Validate = ReturnType<InstanceType<typeof Ajv>["compile"]>
 
-function expectValid(
-  validate: Validate,
-  data: unknown,
-  ctx?: {oas: {mode: OasMode; location?: "requestBody" | "responseBody"}}
-) {
+function expectValid(validate: Validate, data: unknown, ctx?: Context) {
   const valid = ctx ? validate.call(ctx, data, buildContext(data)) : validate(data)
   valid.should.equal(true)
 }
@@ -40,7 +30,7 @@ function expectInvalid(
   validate: Validate,
   data: unknown,
   keyword: "readOnly" | "writeOnly" | "required",
-  ctx?: {oas: {mode: OasMode; location?: "requestBody" | "responseBody"}}
+  ctx?: Context
 ) {
   const valid = ctx ? validate.call(ctx, data, buildContext(data)) : validate(data)
   valid.should.equal(false)
@@ -78,7 +68,7 @@ describe("readOnly/writeOnly", () => {
 
     it("should skip readOnly in request context and still require writeOnly", () => {
       const validate = getAjv().compile(schemaWithRequired)
-      const requestCtx = getOasContext("request", "requestBody")
+      const requestCtx: Context = {apiContext: "request"}
 
       expectValid(validate, {password: "secret"}, requestCtx)
       expectInvalid(validate, {id: "1", password: "secret"}, "readOnly", requestCtx)
@@ -87,7 +77,7 @@ describe("readOnly/writeOnly", () => {
 
     it("should skip writeOnly in response context and still require readOnly", () => {
       const validate = getAjv().compile(schemaWithRequired)
-      const responseCtx = getOasContext("response", "responseBody")
+      const responseCtx: Context = {apiContext: "response"}
 
       expectValid(validate, {id: "1"}, responseCtx)
       expectInvalid(validate, {id: "1", password: "secret"}, "writeOnly", responseCtx)
@@ -98,14 +88,14 @@ describe("readOnly/writeOnly", () => {
   describe("presence validation with context", () => {
     it("should reject readOnly in request context", () => {
       const validate = getAjv().compile(baseSchema)
-      const requestCtx = getOasContext("request", "requestBody")
+      const requestCtx: Context = {apiContext: "request"}
 
       expectInvalid(validate, {id: "1"}, "readOnly", requestCtx)
     })
 
     it("should reject writeOnly in response context", () => {
       const validate = getAjv().compile(baseSchema)
-      const responseCtx = getOasContext("response", "responseBody")
+      const responseCtx: Context = {apiContext: "response"}
 
       expectInvalid(validate, {password: "secret"}, "writeOnly", responseCtx)
     })
