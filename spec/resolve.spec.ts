@@ -5,10 +5,8 @@ import type {AnyValidateFunction} from "../dist/types"
 import type MissingRefError from "../dist/compile/ref_error"
 import chai from "./chai"
 import * as uriJs from "uri-js"
-import * as uriJs from "uri-js"
 const should = chai.should()
 
-const uriResolvers = [undefined, uriJs]
 const uriResolvers = [undefined, uriJs]
 
 uriResolvers.forEach((resolver) => {
@@ -17,8 +15,6 @@ uriResolvers.forEach((resolver) => {
     describeTitle = "uri-js resolver"
   } else {
     describeTitle = "uri-js resolver"
-  } else {
-    describeTitle = "fast-uri resolver"
   }
   describe(describeTitle, () => {
     describe("resolve", () => {

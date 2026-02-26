@@ -4,7 +4,6 @@ import {_, getProperty, Name} from "../../compile/codegen"
 import {DiscrError, DiscrErrorObj} from "../discriminator/types"
 import {resolveRef, SchemaEnv} from "../../compile"
 import MissingRefError from "../../compile/ref_error"
-import MissingRefError from "../../compile/ref_error"
 import {schemaHasRulesButRef} from "../../compile/util"
 
 export type DiscriminatorError = DiscrErrorObj<DiscrError.Tag> | DiscrErrorObj<DiscrError.Mapping>
