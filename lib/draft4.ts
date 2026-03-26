@@ -8,7 +8,7 @@ const META_SUPPORT_DATA = ["/properties"]
 
 const META_SCHEMA_ID = "http://json-schema.org/draft-04/schema"
 
-class Ajv extends AjvCore {
+export class Ajv extends AjvCore {
   constructor(opts: Options = {}) {
     super({
       ...opts,
