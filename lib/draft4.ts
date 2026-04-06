@@ -40,7 +40,6 @@ export class Ajv extends AjvCore {
   }
 }
 
-module.exports = exports = Ajv
 Object.defineProperty(exports, "__esModule", {value: true})
 
 export default Ajv
